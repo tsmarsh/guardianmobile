@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title>
+			the Guardian
+		</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="minimum-scale=1.0, width=device-width, maximum-scale=1.6, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="YES">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<link rel="apple-touch-icon" href="apple-touch-icon.png">
+		<link rel="stylesheet" href="main.css" type="text/css">
+		<link rel="stylesheet" href="Parts/Transitions.css" type="text/css">
+		<script type="text/javascript" src="Parts/utilities.js" charset="utf-8">
+</script>
+		<script type="text/javascript" src="Parts/setup.js" charset="utf-8">
+</script>
+		<script type="text/javascript" src="Parts/Text.js" charset="utf-8">
+</script>
+		<script type="text/javascript" src="attributes.js" charset="utf-8">
+</script>
+		<script type="text/javascript" src="RSSSupport.js" charset="utf-8">
+</script>
+		<script type="text/javascript" src="main.js" charset="utf-8">
+</script>
+		<script type="text/javascript" src="Parts/Transitions.js" charset="utf-8">
+</script>
+		<script type="text/javascript" src="Parts/StackLayout.js" charset="utf-8">
+</script>
+		<script type="text/javascript" src="Parts/List.js" charset="utf-8">
+</script>
+		<script type="text/javascript" src="Parts/PushButton.js" charset="utf-8">
+</script>
+		<script type="text/javascript" src="Parts/ButtonHandler.js" charset="utf-8">
+</script>
+	</head>
+	<body onload="load();">
+		<div id="content">
+			<div apple-part="com.apple.Dashcode.part.box" id="header"></div>
+			<table>
+				<tr>
+					<td class="zone" id="news" onclick="loadSection()">
+						News
+					</td>
+					<td class="zone" id="sport" onclick="loadSection('sport')">
+						Sport
+					</td>
+					<td class="zone" onclick="loadSection('sport/football')" id="football">
+						Football
+					</td>
+				</tr>
+				<tr>
+					<td class="zone" id="comment" onclick="loadSection('commentisfree')">
+						Comment
+					</td>
+					<td class="zone" id="culture" onclick="loadSection('culture')">
+						Culture
+					</td>
+					<td class="zone" id="business" onclick="loadSection('business')">
+						Business
+					</td>
+				</tr>
+				<tr>
+					<td class="zone" id="money" onclick="loadSection('money')">
+						Money
+					</td>
+					<td class="zone" id="lifeandstyle" onclick="loadSection('lifeandstyle')">
+						Life &amp; Style
+					</td>
+					<td class="zone" id="travel" onclick="loadSection('travel')">
+						Travel
+					</td>
+				</tr>
+				<tr>
+					<td class="zone" id="environment" onclick="loadSection('environment')">
+						Environment
+					</td>
+					<td>
+						&nbsp;
+					</td>
+					<td>
+						<div id="spinner"></div>
+					</td>
+				</tr>
+			</table>
+			<div class="credits">
+			<span apple-part="com.apple.Dashcode.part.webtext" class="apple-text apple-no-children" id="articleByline"></span>
+			<span apple-part="com.apple.Dashcode.part.webtext" class="apple-text apple-no-children" apple-default-image-visibility="hidden" apple-text-overflow="ellipsis" id="todaysDate" apple-style="part-width-dependent: true;part-height-dependent: true;"></span>
+			</div>
+			<div apple-part="com.apple.Dashcode.part.box" id="topSplitter1"></div>
+		</div>
+		<div apple-part="com.apple.Dashcode.part.StackLayout" id="StackLayout">
+			<div id="frontPage" apple-part-locked="true">
+				<ul apple-part="com.apple.Dashcode.part.edgeToEdgeList" id="headlineList">
+					<li id="listRowTemplate" apple-template="true" class="listRowTemplate_template">
+						<div id="headlineTitle" apple-part="com.apple.Dashcode.part.webtext" class="label_template" >
+							Article Title
+						</div>
+						<div id="arrow" apple-part="com.apple.Dashcode.part.box" class="arrow_template"></div>
+						<div apple-part="com.apple.Dashcode.part.webtext" class="apple-text apple-no-children text2_template"  id="headlineDescription"></div>
+						<div apple-part="com.apple.Dashcode.part.box" id="headlineSplitter" class="box1_template"></div>
+					</li>
+				</ul>
+				<div apple-part="com.apple.Dashcode.part.box" id="topSplitter1"></div>
+				<ul apple-part="com.apple.Dashcode.part.edgeToEdgeList" id="secondHeadlines">
+					<li id="listRowTemplate1" apple-template="true" class="listRowTemplate1_template">
+						<div id="secondHeadlineTitle" apple-part="com.apple.Dashcode.part.webtext" class="label1_template" apple-text-overflow="ellipsis">
+							Article Title
+						</div>
+						<div id="arrow1" apple-part="com.apple.Dashcode.part.box" class="arrow1_template"></div>
+						<div apple-part="com.apple.Dashcode.part.box" id="secondHeadlineSplitter" class="box_template"></div>
+					</li>
+				</ul>
+			</div>
+			<div id="articlePage" apple-part-locked="true">
+				<div apple-part="com.apple.Dashcode.part.webtext" class="apple-text apple-no-children" apple-default-image-visibility="hidden" apple-text-overflow="ellipsis" id="articleTitle" apple-style="part-width-dependent: true;part-height-dependent: true;"></div>
+				<div apple-part="com.apple.Dashcode.part.box" id="articleBox">
+					<div apple-part="com.apple.Dashcode.part.webtext" class="apple-text apple-no-children" id="articleDescription"></div>
+					<div apple-part="com.apple.Dashcode.part.webtext" class="apple-text apple-no-children" apple-default-image-visibility="hidden" apple-text-overflow="ellipsis" id="articleDate" apple-style="part-width-dependent: true;part-height-dependent: true;"></div>
+				</div>
+				<div apple-part="com.apple.Dashcode.part.box" id="navigation">
+					<div apple-part="com.apple.Dashcode.part.goforwardbutton" class="apple-no-children" apple-style="image-theme: 0; image-shape: 12; image-button-type: 0; image-opacity: 1.00; image-top-color: 1,1,1; image-bottom-color: 1,1,1; image-radius: 5,5,5,5; image-border: 1; image-border-color: 0.750011444,0.750011444,0.750011444; image-border-width: 1; shine-on: 0; shine-strength: 0.33; shine-alpha-level: 0.00; shine-height: 0.50; glass-arc-height: 0.00; shadow-include-shadow: 0;" id="readMore"></div>
+					<div apple-part="com.apple.Dashcode.part.gobackbutton" class="apple-no-children" apple-style="image-theme: 0; image-shape: 11; image-button-type: 0; image-opacity: 1.00; image-top-color: 1,1,1; image-bottom-color: 1,1,1; image-radius: 5,5,5,5; image-border: 1; image-border-color: 0.750011444,0.750011444,0.750011444; image-border-width: 1; shine-on: 0; shine-strength: 0.33; shine-alpha-level: 0.00; shine-height: 0.50; glass-arc-height: 0.00; shadow-include-shadow: 0;" id="backToHeadlines"></div>
+				</div>
+				<div apple-part="com.apple.Dashcode.part.box" id="articleBottomSplitter"></div>
+			</div>
+		</div>
+		<div apple-part="com.apple.Dashcode.part.webtext" class="apple-text apple-no-children" apple-default-image-visibility="hidden" apple-text-overflow="ellipsis" id="footer" apple-group="text" apple-style="part-width-dependent: true;part-height-dependent: true;"></div>
+	</body>
+</html>
