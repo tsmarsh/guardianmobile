@@ -31,6 +31,7 @@ function loadSection(section)
 		attributes.feedURL= attributes.domain + "rss";
 	}
 	load();
+	document.getElementById("StackLayout").object.setCurrentView("frontPage", true);
 }
 
 

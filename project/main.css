@@ -529,3 +529,8 @@ div.related li a{
 	text-decoration: none;
 	margin-left: 10px;
 }
+
+p a img{
+	height: 60px;
+	width: 468px;
+}

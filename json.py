@@ -23,28 +23,29 @@ import logging
 import feedparser
 import simplejson
 import StringIO
+import main
+import time
 from google.appengine.api.urlfetch import fetch
 
 from google.appengine.ext import webapp
 
-class MainHandler(webapp.RequestHandler):
-	def getFeed(self):
-		rest_params = self.request.path.split('/')
-		logging.info("Rest params: " + str(rest_params))
-		if len(rest_params) > 2:
-			section = rest_params[1]
-			url = "http://www.guardian.co.uk/" + section + "/rss"
-		else:
-			url = "http://www.guardian.co.uk/rss"
-		return fetch(url).content
+#time.struct_time
+#(2009, 2, 10, 9, 9, 0, 1, 41, 0)
 
-class RSSHandler(MainHandler):
+class ComplexEncoder(simplejson.JSONEncoder):
+	def default(self, obj):
+		if isinstance(obj, time.struct_time):
+			return time.strftime("%a, %d %b %Y %H:%M:%S +0000", obj)
+		return simplejson.JSONEncoder.default(self, obj)
+		
+class JSONHandler(main.MainHandler):
 	def get(self):
-		logging.info("Request path:\t" + self.request.path)
-		self.response.out.write(self.getFeed())
+		content = self.getFeed()
+		parsed_feed = simplejson.dumps(feedparser.parse(content), cls=ComplexEncoder)
+		self.response.out.write(parsed_feed)
 
 def main():
-	application = webapp.WSGIApplication([('/.*/?rss', RSSHandler)], debug=True)
+	application = webapp.WSGIApplication([('/.*/?json', JSONHandler)], debug=True)
 	wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':
