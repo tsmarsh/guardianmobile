@@ -1,31 +1,10 @@
-#!/usr/bin/env python
-#
-# Copyright 2007 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-
-
-
 import wsgiref.handlers
-import logging
-import feedparser
-import simplejson
-import StringIO
+import logging, unittest
+import feedparser, simplejson, time
 import main
-import time
+
 from google.appengine.api.urlfetch import fetch
+from BeautifulSoup import BeautifulSoup
 
 from google.appengine.ext import webapp
 
@@ -41,9 +20,34 @@ class ComplexEncoder(simplejson.JSONEncoder):
 class JSONHandler(main.MainHandler):
 	def get(self):
 		content = self.getFeed()
-		parsed_feed = simplejson.dumps(feedparser.parse(content), cls=ComplexEncoder)
-		self.response.out.write(parsed_feed)
+		cleaned_feed = self.clean(feedparser.parse(content))
+		self.response.out.write(self.pythonToJson(cleaned_feed))
+	
+	def pythonToJson(self, obj):
+		return simplejson.dumps(obj, cls=ComplexEncoder)
+		
+	def clean(self, feed):
+		for entry in feed['entries']:
+			self.remove_css(entry['summary_detail']['value'])
+		return feed
+	
+	def remove_css(self, markup):
+		soup = BeautifulSoup(markup)
+		divs = soup.findAll()
+		for div in divs:
+			if div.has_key('style'):
+				del(div['style'])
 
+class Tests(unittest.TestCase):
+
+	def setUp(self):
+		self.jsonHandler = JSONHandler()
+	
+	def testShouldConvertPythonObjectsToJson(self):
+		stub = {'time': (2004, 1, 1, 12, 30, 2, 0, 0, 0), 'detail': "monkey"}
+		json = self.jsonHandler.pythonToJson(stub)
+		print json;
+		
 def main():
 	application = webapp.WSGIApplication([('/.*/?json', JSONHandler)], debug=True)
 	wsgiref.handlers.CGIHandler().run(application)

@@ -5,7 +5,7 @@ api_version: 1
 
 handlers:
 - url: /.*/?rss
-  script: main.py
+  script: xml.py
 - url: /.*/?json
   script: json.py
 - url: /
