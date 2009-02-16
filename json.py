@@ -93,9 +93,9 @@ class JSONHandler(webapp.RequestHandler):
 			entry['guid'] = feedObject['guid']
 			entry['title'] = feedObject['title']
 			entry['description'] = feedObject['summary_detail']['value']
-			entry['date'] = feedObject['updated']
-			entry['byline'] = feedObject['author']
-			entry['type'] = feedObject['dc_type'].lower()
+			entry['date'] = feedObject.get('updated', "")
+			entry['byline'] = feedObject.get('author', "")
+			entry['type'] = feedObject.get('dc_type', "").lower()
 			entry['media'] = []
 			if(feedObject.has_key('media_content')):
 				for content in feedObject['media_content']:

@@ -5,13 +5,17 @@
 	<script type="text/javascript" src="jquery-1.3.1.min.js"></script>
 	<script type="text/javascript" src="trimpath-template-1.0.38.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
-			jQuery.getJSON("/json",
+		var populateTrail = function(url){
+			$("div#article-list").html('<img src="Images/load.gif />"');
+			jQuery.getJSON(url + "/json",
 				function(json){
 					$("div#article-list").html(TrimPath.processDOMTemplate("article-list-template",json));
 				}
-			)	
-		});
+			);
+		}
+		$(document).ready(function(){
+				populateTrail("");
+			});
 	</script>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="minimum-scale=1.0, width=320; user-scalable=false">
@@ -22,46 +26,46 @@
 	<div id="title"></div>
 	<table class="section-title">
 		<tr>
-			<td class="zone" id="news">
+			<td class="zone news" onclick="populateTrail('')">
 				News
 			</td>
-			<td class="zone" id="sport" >
+			<td class="zone sport" onclick="populateTrail('sport')">
 				Sport
 			</td>
-			<td class="zone" id="football">
+			<td class="zone football" onclick="populateTrail('football')">
 				Football
 			</td>
 		</tr>
 		<tr>
-			<td class="zone" id="comment" >
+			<td class="zone comment" onclick="populateTrail('commentisfree')">
 				Comment
 			</td>
-			<td class="zone" id="culture" >
+			<td class="zone culture" onclick="populateTrail('culture')">
 				Culture
 			</td>
-			<td class="zone" id="business" >
+			<td class="zone business" onclick="populateTrail('business')">
 				Business
 			</td>
 		</tr>
 		<tr>
-			<td class="zone" id="technology" >
+			<td class="zone technology" onclick="populateTrail('technology')">
 				Technology
 			</td>
-			<td class="zone" id="lifeandstyle" >
+			<td class="zone lifeandstyle" onclick="populateTrail('lifeandstyle')">
 				Life &amp; Style
 			</td>
-			<td class="zone" id="travel" >
+			<td class="zone travel" onclick="populateTrail('travel')">
 				Travel
 			</td>
 		</tr>
 		<tr>
-			<td class="zone" id="environment" >
+			<td class="zone environment" onclick="populateTrail('environment')">
 				Environment
 			</td>
-			<td class="zone" id="science" >
+			<td class="zone science" onclick="populateTrail('science')">
 				Science
 			</td>
-			<td class="zone" id="money" >
+			<td class="zone money" onclick="populateTrail('money')">
 				Money
 			</td>
 		</tr>
@@ -101,21 +105,6 @@
 	         <li>No entries in feed</li>
 	     {/for}
 	    </ul>
-	</textarea>
-	<textarea id="article-template" style="display: none">
-		<div class="entry-title" >
-			${topStory.title}
-		</div>
-		<div class="content" />
-			{for entry in entry.thumbnail}
-				<div class="main-pic">
-					<img src="${entry.thumbnail.url}" />
-				</div>
-			{/for}
-			<div class="description">
-				${topStory.description}
-			</div>
-		</div>
 	</textarea>
 </body>
 </html>

@@ -30,51 +30,51 @@ td.zone {
 	color: white;
 }
 
-#news {
+.news {
 	background-color: #D61D00;
 }
 
-#sport {
+.sport {
 	background-color: #008000;
 }
 
-#football {
+.football {
 	background-color: #008000;
 }
 
-#comment {
+.comment {
 	background-color: #0061BB;
 }
 
-#culture {
+.culture {
 	background-color: #D1008B;
 }
 
-#business {
+.business {
 	background-color: #3246AB;
 }
 
-#money {
+.money {
 	background-color: #8F1AB6;
 }
 
-#lifeandstyle {
+.lifeandstyle {
 	background-color: #AD532F;
 }
 
-#travel {
+.travel {
 	background-color: #066EC9;
 }
 
-#environment {
+.environment {
 	background-color: #4A7801;
 }
 
-#science {
+.science {
 	background-color: #AB1700;
 }
 
-#technology {
+.technology {
 	background-color: #AB1700;
 }
 
