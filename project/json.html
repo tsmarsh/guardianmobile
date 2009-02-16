@@ -71,28 +71,25 @@
 	<div id="article-list"></div>
 	<textarea id="article-list-template" style="display:none">
 		<div class="top-story">
-			<div class="entry-title" >
+			<h2>
 				${topStory.title}
-			</div>
+			</h2>
 			{if topStory.thumbnail}
 				<div class="trail-pic">
 					<img src="${topStory.thumbnail.url}" />
 				</div>
 			{/if}
-			<div class="arrow"></div>
 			<div class="entry-description">
 				${topStory.description}
 			</div>
 		</div>
-		<div class="entry-splitter"></div>
 		<ul class="leaders"> 
 		{for entry in leaders}
 			<li>
-				<div class="entry-title" >
+				<h2>
 					${entry.title}
-				</div>
+				</h2>
 				<div class="content">
-					<div class="arrow"></div>
 					{if entry.thumbnail}
 					<div class="trail-pic">
 						<img src="${entry.thumbnail.url}" />
@@ -102,7 +99,6 @@
 						${entry.description}
 					</div>
 				</div>
-				<div class="entry-splitter"></div>
 			</li>
 	     {forelse}
 	         <li>No entries in feed</li>
@@ -111,11 +107,9 @@
 		<ul class="latest"> 
 		{for entry in latest}
 			<li>
-				<div class="entry-title" >
+				<h2>
 					${entry.title}
-				</div>
-				<div class="arrow"></div>
-				<div class="entry-splitter"></div>
+				</h2>
 			</li>
 	     {forelse}
 	         <li>No entries in feed</li>

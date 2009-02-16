@@ -78,9 +78,13 @@ td.zone {
 	background-color: #AB1700;
 }
 
-div.entry-title {
+h2 {
 	color: rgb(0, 86, 137);
 	padding-left: 5px;
+	padding-right: 10px;
+	border-top: #888888;
+	border-top-style: solid;
+	border-top-width: 1px;
 	font-family: georgia;
 	font-size: 17px;
 	font-weight: bold;
@@ -89,7 +93,10 @@ div.entry-title {
 	text-shadow: rgb(255, 255, 255) 0px 1px 0px;
 	overflow: hidden;
 	white-space: nowrap;
-	text-overflow: ellipsis
+	text-overflow: ellipsis;
+	background-image: url('/Images/chevron.png');
+	background-repeat: no-repeat;
+	background-position:right;
 }
 div.content {
 	padding-left: 5px;
@@ -98,6 +105,7 @@ div.content {
 
 div.entry-description {
 	padding-left: 1em;
+	padding-right: 1em;
 	left: 10px;
     font-family: arial,sans-serif;
     font-size: 9pt;
@@ -134,7 +142,11 @@ div.trail-pic img{
 }
 
 ul{
-	padding: 0px;
+	padding: 0;
+}
+
+p{
+	margin-top: 0;
 }
 
 ul.latest li{
