@@ -1,0 +1,120 @@
+<html>
+<head>
+	<title>the Guardian</title>
+	<link rel="stylesheet" href="guardian.css" type="text/css">
+	<script type="text/javascript" src="jquery-1.3.1.min.js"></script>
+	<script type="text/javascript" src="trimpath-template-1.0.38.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			jQuery.getJSON("http://localhost:9100/json",
+				function(json){
+					$("div#article-list").html(TrimPath.processDOMTemplate("article-list-template",json));
+				}
+			)	
+		});
+	</script>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="minimum-scale=1.0, width=device-width, maximum-scale=1.6, user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="YES">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<link rel="apple-touch-icon" href="apple-touch-icon.png">
+</head>
+<body>
+	<div id="title"></div>
+	<table class="section-title">
+		<tr>
+			<td class="zone" id="news">
+				News
+			</td>
+			<td class="zone" id="sport" >
+				Sport
+			</td>
+			<td class="zone" id="football">
+				Football
+			</td>
+		</tr>
+		<tr>
+			<td class="zone" id="comment" >
+				Comment
+			</td>
+			<td class="zone" id="culture" >
+				Culture
+			</td>
+			<td class="zone" id="business" >
+				Business
+			</td>
+		</tr>
+		<tr>
+			<td class="zone" id="money" >
+				Money
+			</td>
+			<td class="zone" id="lifeandstyle" >
+				Life &amp; Style
+			</td>
+			<td class="zone" id="travel" >
+				Travel
+			</td>
+		</tr>
+		<tr>
+			<td class="zone" id="environment" >
+				Environment
+			</td>
+			<td class="zone" id="science" >
+				Science
+			</td>
+			<td class="zone" id="technology" >
+				Technology
+			</td>
+		</tr>
+	</table>
+	<div id="article-list"></div>
+	<textarea id="article-list-template" style="display:none">
+		<div class="top-story">
+			<div class="entry-title" >
+				${topStory.title}
+			</div>
+			<div class="arrow"></div>
+			<div class="entry-description">
+				${topStory.description}
+			</div>
+		</div>
+		<div class="entry-splitter"></div>
+		<ul class="leaders"> 
+		{for entry in leaders}
+			<li>
+				<div class="entry-title" >
+					${entry.title}
+				</div>
+				<div class="arrow"></div>
+				<div class="content">
+					{if entry.thumbnail}
+					<div class="trail-pic">
+						<img src="${entry.thumbnail.url}" />
+					</div>
+					{/if}
+					<div class="entry-description">
+						${entry.description}
+					</div>
+				</div>
+				<div class="entry-splitter"></div>
+			</li>
+	     {forelse}
+	         <li>No entries in feed</li>
+	     {/for}
+	    </ul>
+		<ul class="latest"> 
+		{for entry in latest}
+			<li>
+				<div class="entry-title" >
+					${entry.title}
+				</div>
+				<div class="arrow"></div>
+				<div class="entry-splitter"></div>
+			</li>
+	     {forelse}
+	         <li>No entries in feed</li>
+	     {/for}
+	    </ul>
+	</textarea>
+</body>
+</html>

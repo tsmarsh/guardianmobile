@@ -110,7 +110,6 @@ var detailController = {
 setRepresentedObject: function(representedObject) {
     // To start, the represented object of our detail controller is simply a string, the title of the list row that the user chose.  You may want to make the represented object any kind of object when you customize the template.
     this._representedObject = representedObject;
-    
     // When the represented object is set, this controller also updates the DOM for the detail page appropriately.  As you customize the design for the detail page, you will want to extend this code to make sure that the correct information is populated into the detail UI.
     var title = document.getElementById('articleTitle');
     title.innerText = extractText( feedResults[this._representedObject].title );
