@@ -23,6 +23,10 @@ class MainHandler(webapp.RequestHandler):
 				if cached_response.headers['last-modified'] == last_modified:
 					logging.info("Found matching request in cache")
 					return cached_response.content
+				else:
+					logging.info("Newer content found storing %s in cache" % url)
+					memcache.set(url, response, 600)
+					return response.content
 			else:
 				logging.info("Storing %s in cache" % url)
 				memcache.set(url, response, 600)

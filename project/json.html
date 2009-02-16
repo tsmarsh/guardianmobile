@@ -6,7 +6,7 @@
 	<script type="text/javascript" src="trimpath-template-1.0.38.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			jQuery.getJSON("http://localhost:9100/json",
+			jQuery.getJSON("/json",
 				function(json){
 					$("div#article-list").html(TrimPath.processDOMTemplate("article-list-template",json));
 				}
@@ -67,12 +67,18 @@
 			</td>
 		</tr>
 	</table>
+	<div id="article"></div>
 	<div id="article-list"></div>
 	<textarea id="article-list-template" style="display:none">
 		<div class="top-story">
 			<div class="entry-title" >
 				${topStory.title}
 			</div>
+			{if topStory.thumbnail}
+				<div class="trail-pic">
+					<img src="${topStory.thumbnail.url}" />
+				</div>
+			{/if}
 			<div class="arrow"></div>
 			<div class="entry-description">
 				${topStory.description}
@@ -85,8 +91,8 @@
 				<div class="entry-title" >
 					${entry.title}
 				</div>
-				<div class="arrow"></div>
 				<div class="content">
+					<div class="arrow"></div>
 					{if entry.thumbnail}
 					<div class="trail-pic">
 						<img src="${entry.thumbnail.url}" />
@@ -115,6 +121,21 @@
 	         <li>No entries in feed</li>
 	     {/for}
 	    </ul>
+	</textarea>
+	<textarea id="article-template" style="display: none">
+		<div class="entry-title" >
+			${topStory.title}
+		</div>
+		<div class="content" />
+			{for entry in entry.thumbnail}
+				<div class="main-pic">
+					<img src="${entry.thumbnail.url}" />
+				</div>
+			{/for}
+			<div class="description">
+				${topStory.description}
+			</div>
+		</div>
 	</textarea>
 </body>
 </html>

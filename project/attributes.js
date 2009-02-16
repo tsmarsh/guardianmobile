@@ -5,10 +5,10 @@
  code generator otherwise the changes will be lost.
  */
 var attributes = {
-	//"domain": "http://guardianmobile.appspot.com/",
-    //"feedURL": "http://guardianmobile.appspot.com/rss",
-	"domain": "http://localhost:9100/",
-    "feedURL": "http://localhost:9100/rss",
+	"domain": "http://guardianmobile.appspot.com/",
+    "feedURL": "http://guardianmobile.appspot.com/rss",
+	//"domain": "http://localhost:9100/",
+    //"feedURL": "http://localhost:9100/rss",
     "maxAgeToShow": "-1",
     "numItemsToShow": "-1",
     "topStories": "10"
