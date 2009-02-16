@@ -6,7 +6,7 @@
 	<script type="text/javascript" src="trimpath-template-1.0.38.js"></script>
 	<script type="text/javascript">
 		var populateTrail = function(url){
-			$("div#article-list").html('<img src="Images/load.gif />"');
+			$("div#article-list").html('<img src="/Images/load.gif />"');
 			jQuery.getJSON(url + "/json",
 				function(json){
 					$("div#article-list").html(TrimPath.processDOMTemplate("article-list-template",json));
