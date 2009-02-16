@@ -79,8 +79,7 @@ class JSONHandler(webapp.RequestHandler):
 		for entry in feed['entries']:
 			#self.remove_css(entry['summary_detail']['value'])
 			entries.append(self.buildEntry(entry))
-		processed_feed['topStory'] = entries[0]
-		processed_feed['leaders'] = entries[1:9]
+		processed_feed['leaders'] = entries[:9]
 		processed_feed['latest'] = entries[9:]
 		return processed_feed
 	
