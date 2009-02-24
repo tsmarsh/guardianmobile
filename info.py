@@ -4,7 +4,6 @@ from google.appengine.ext import webapp
 
 class InfoHandler(webapp.RequestHandler):
 	def get(self):
-		self.response.out.write("hello!")
 		for name in os.environ.keys():
 			self.response.out.write("%s = %s<br />\n" % (name, os.environ[name]))
 
