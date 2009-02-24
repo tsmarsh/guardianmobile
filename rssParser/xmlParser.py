@@ -2,7 +2,7 @@
 
 import wsgiref.handlers
 import logging
-import main
+
 
 from google.appengine.ext import webapp
 

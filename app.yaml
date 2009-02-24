@@ -5,9 +5,9 @@ api_version: 1
 
 handlers:
 - url: /.*/?rss
-  script: xml.py
+  script: rssParser.xmlParser.py
 - url: /.*/?json
-  script: json.py
+  script: rssParser.json.py
 - url: /
   static_dir: project
 
