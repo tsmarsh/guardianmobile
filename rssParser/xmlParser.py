@@ -2,11 +2,11 @@
 
 import wsgiref.handlers
 import logging
-
+import rssParser.main
 
 from google.appengine.ext import webapp
 
-class RSSHandler(main.MainHandler):
+class RSSHandler(rssParser.main.MainHandler):
 	def get(self):
 		logging.info("Request path:\t" + self.request.path)
 		self.response.out.write(self.getFeed())

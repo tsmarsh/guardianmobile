@@ -2,7 +2,6 @@ import wsgiref.handlers
 import logging, re
 import simplejson, time
 from google.appengine.ext import webapp
-#from google.appengine.api.urlfetch import fetch
 import urllib2
 from rssParser.rssparser import RSSParser
 
@@ -25,8 +24,6 @@ class JSONHandler(webapp.RequestHandler):
 			self.url = "http://www.guardian.co.uk/" + rest_params + "/rss"
 			logging.info("Fetching: " + self.url)
 			response = urllib2.urlopen(self.url)
-			#last_modified = response.headers['last-modified']
-			#logging.info("Last modified: " + last_modified)
 			return response
 			
 	def get(self):

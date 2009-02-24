@@ -18,17 +18,5 @@ class MainHandler(webapp.RequestHandler):
 			response = fetch(url)
 			last_modified = response.headers['last-modified']
 			logging.info("Last modified: " + last_modified)
-			cached_response = memcache.get(url)
-			if cached_response:
-				if cached_response.headers['last-modified'] == last_modified:
-					logging.info("Found matching request in cache")
-					return cached_response.content
-				else:
-					logging.info("Newer content found storing %s in cache" % url)
-					memcache.set(url, response, 600)
-					return response.content
-			else:
-				logging.info("Storing %s in cache" % url)
-				memcache.set(url, response, 600)
-				return response.content
+			return response.content
 		
