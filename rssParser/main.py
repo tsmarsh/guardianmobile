@@ -5,8 +5,8 @@ import logging
 import re
 from google.appengine.ext import webapp
 from google.appengine.api.urlfetch import fetch
-from google.appengine.api import memcache
-sectionCMSPath = re.compile(r'/?(.*)/[r|j].*$')
+
+sectionCMSPath = re.compile(r'/?(.*)/rss$')
 
 class MainHandler(webapp.RequestHandler):
 	def getFeed(self):
