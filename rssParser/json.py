@@ -1,8 +1,9 @@
 import wsgiref.handlers
 import logging, re
 import simplejson, time
+from StringIO import StringIO
 from google.appengine.ext import webapp
-import urllib2
+from google.appengine.api.urlfetch import fetch
 from rssParser.rssparser import RSSParser
 
 from google.appengine.ext import webapp
@@ -23,7 +24,7 @@ class JSONHandler(webapp.RequestHandler):
 			rest_params = match.group(1)		
 			self.url = "http://www.guardian.co.uk/" + rest_params + "/rss"
 			logging.info("Fetching: " + self.url)
-			response = urllib2.urlopen(self.url)
+			response = StringIO(fetch(self.url).content)
 			return response
 			
 	def get(self):

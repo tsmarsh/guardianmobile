@@ -1,15 +1,11 @@
-application: guardianmobile
+application: superguardianmobile
 version: 1
 runtime: python
 api_version: 1
 
 handlers:
-- url: /info
-  script: info.py
 - url: /.*/?json
-  script: rssParser.json.py
-- url: /.*/?rss
-  script: rssParser.xmlParser.py
+  script: rssParser/json.py
 - url: /
   static_dir: project
 
