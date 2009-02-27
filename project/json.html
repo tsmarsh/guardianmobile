@@ -1,60 +1,188 @@
 <html>
 <head>
 	<title>the Guardian</title>
-	<link rel="stylesheet" href="guardian.css" type="text/css">
+	<style>
+		body {
+		    font-family: arial,sans-serif;
+		    background-color: white;
+		}
+
+		h1{
+			margin-top: 25px;
+			padding: 25px;
+			background-image: url('/Images/guardian_logo.gif');
+			background-repeat: no-repeat;
+			background-position:center;
+			position: center;
+		}
+
+		ul.section-title{
+			overflow: hidden;
+		}
+		li.zone {
+			float: left;
+			font-family: georgia,serif;
+			-webkit-border-radius: 5px;
+			-moz-border-radius: 5px;
+			margin: 2px;
+			height: 24px;
+			width: 72px;
+			padding-left: 12px;
+			padding-right: 12px;
+			padding-top: 12px;
+			color: white;
+		}
+
+		.news {
+			background-color: #D61D00;
+		}
+
+		.sport {
+			background-color: #008000;
+		}
+
+		.football {
+			background-color: #008000;
+		}
+
+		.comment {
+			background-color: #0061BB;
+		}
+
+		.culture {
+			background-color: #D1008B;
+		}
+
+		.business {
+			background-color: #3246AB;
+		}
+
+		.money {
+			background-color: #8F1AB6;
+		}
+
+		.lifeandstyle {
+			background-color: #AD532F;
+		}
+
+		.travel {
+			background-color: #066EC9;
+		}
+
+		.environment {
+			background-color: #4A7801;
+		}
+
+		.science {
+			background-color: #AB1700;
+		}
+
+		.technology {
+			background-color: #AB1700;
+		}
+
+		h2 {
+			color: rgb(0, 86, 137);
+			padding-left: 5px;
+			padding-right: 10px;
+			border-top: #888888;
+			border-top-style: solid;
+			border-top-width: 1px;
+			font-family: georgia;
+			font-size: 17px;
+			font-weight: bold;
+			overflow-x: hidden;
+			overflow-y: hidden;
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			background-image: url('/Images/chevron.png');
+			background-repeat: no-repeat;
+			background-position:right;
+		}
+		div.content {
+			padding-left: 5px;
+			padding-bottom: 5px;
+		}
+
+		li {
+			padding-left: 1em;
+			padding-right: 1em;
+			left: 10px;
+		    font-family: arial,sans-serif;
+		    font-size: 9pt;
+		    color: #333333;
+			height: 160px;
+			overflow: hidden;
+			text-overflow: ellipsis
+		}
+
+		div.trail-pic img{
+			width: 140px;
+			float: left;
+			padding-left: 5px;
+			padding-right: 5px;
+		}
+
+		ul{
+			padding: 0;
+		}
+
+		p{
+			margin-top: 0;
+		}
+
+		ul.latest li{
+			height: 44px;
+			vertical-align: center;
+		}
+	</style>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="minimum-scale=1.0, width=320; user-scalable=false">
 	<meta name="apple-mobile-web-app-capable" content="YES">
 	<link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
+
 <body>
-	<div id="title"></div>
-	<table class="section-title">
-		<tr>
-			<td class="zone news" onclick="populateTrail('')">
-				News
-			</td>
-			<td class="zone sport" onclick="populateTrail('sport')">
-				Sport
-			</td>
-			<td class="zone football" onclick="populateTrail('football')">
-				Football
-			</td>
-		</tr>
-		<tr>
-			<td class="zone comment" onclick="populateTrail('commentisfree')">
-				Comment
-			</td>
-			<td class="zone culture" onclick="populateTrail('culture')">
-				Culture
-			</td>
-			<td class="zone business" onclick="populateTrail('business')">
-				Business
-			</td>
-		</tr>
-		<tr>
-			<td class="zone technology" onclick="populateTrail('technology')">
-				Technology
-			</td>
-			<td class="zone lifeandstyle" onclick="populateTrail('lifeandstyle')">
-				Life &amp; Style
-			</td>
-			<td class="zone travel" onclick="populateTrail('travel')">
-				Travel
-			</td>
-		</tr>
-		<tr>
-			<td class="zone environment" onclick="populateTrail('environment')">
-				Environment
-			</td>
-			<td class="zone science" onclick="populateTrail('science')">
-				Science
-			</td>
-			<td class="zone money" onclick="populateTrail('money')">
-				Money
-			</td>
-		</tr>
-	</table>
+	<h1 id="title"></h1>
+	<ul class="section-title">
+		<li class="zone news" onclick="populateTrail('')">
+			News
+		</li>
+		<li class="zone sport" onclick="populateTrail('sport')">
+			Sport
+		</li>
+		<li class="zone football" onclick="populateTrail('football')">
+			Football
+		</li>
+		<li class="zone comment" onclick="populateTrail('commentisfree')">
+			Comment
+		</li>
+		<li class="zone culture" onclick="populateTrail('culture')">
+			Culture
+		</li>
+		<li class="zone business" onclick="populateTrail('business')">
+			Business
+		</li>
+		<li class="zone technology" onclick="populateTrail('technology')">
+			Technology
+		</li>
+		<li class="zone lifeandstyle" onclick="populateTrail('lifeandstyle')">
+			Life &amp; Style
+		</li>
+		<li class="zone travel" onclick="populateTrail('travel')">
+			Travel
+		</li>
+		<li class="zone environment" onclick="populateTrail('environment')">
+			Environment
+		</li>
+		<li class="zone science" onclick="populateTrail('science')">
+			Science
+		</li>
+		<li class="zone money" onclick="populateTrail('money')">
+			Money
+		</li>
+	</ul>
 	<div id="article-list"></div>
 	
 	
