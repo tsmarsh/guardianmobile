@@ -101,7 +101,7 @@
 			background-repeat: no-repeat;
 			background-position:right;
 		}
-		div.content {
+		ul.content {
 			padding-left: 5px;
 			padding-bottom: 5px;
 		}
@@ -118,7 +118,7 @@
 			text-overflow: ellipsis
 		}
 
-		div.trail-pic img{
+		img.thumbnail {
 			width: 140px;
 			float: left;
 			padding-left: 5px;
@@ -133,7 +133,7 @@
 			margin-top: 0;
 		}
 
-		ul.latest li{
+		ul#latest li{
 			height: 44px;
 			vertical-align: center;
 		}
@@ -147,93 +147,111 @@
 <body>
 	<h1 id="title"></h1>
 	<ul class="section-title">
-		<li class="zone news" onclick="populateTrail('')">
+		<li name="" class="zone news">
 			News
 		</li>
-		<li class="zone sport" onclick="populateTrail('sport')">
+		<li name="sport" class="zone sport">
 			Sport
 		</li>
-		<li class="zone football" onclick="populateTrail('football')">
+		<li name="football" class="zone football">
 			Football
 		</li>
-		<li class="zone comment" onclick="populateTrail('commentisfree')">
+		<li name="commentisfree" class="zone comment">
 			Comment
 		</li>
-		<li class="zone culture" onclick="populateTrail('culture')">
+		<li name="culture" class="zone culture">
 			Culture
 		</li>
-		<li class="zone business" onclick="populateTrail('business')">
+		<li name="business" class="zone business">
 			Business
 		</li>
-		<li class="zone technology" onclick="populateTrail('technology')">
+		<li name="technology" class="zone technology">
 			Technology
 		</li>
-		<li class="zone lifeandstyle" onclick="populateTrail('lifeandstyle')">
+		<li name="lifeandstyle" class="zone lifeandstyle">
 			Life &amp; Style
 		</li>
-		<li class="zone travel" onclick="populateTrail('travel')">
+		<li name="travel" class="zone travel">
 			Travel
 		</li>
-		<li class="zone environment" onclick="populateTrail('environment')">
+		<li name="environment" class="zone environment">
 			Environment
 		</li>
-		<li class="zone science" onclick="populateTrail('science')">
+		<li name="science" class="zone science">
 			Science
 		</li>
-		<li class="zone money" onclick="populateTrail('money')">
+		<li name="money" class="zone money">
 			Money
 		</li>
 	</ul>
-	<div id="article-list"></div>
-	
-	
-	<textarea id="article-list-template" style="display:none">
-		<ul class="leaders"> 
-		{for entry in leaders}
-			<li>
-				<h2>
-					${entry.title}
-				</h2>
-				<div class="content">
-					{if entry.thumbnail}
-					<div class="trail-pic">
-						<img src="${entry.thumbnail.url}" />
-					</div>
-					{/if}
-					<div class="entry-description">
-						${entry.description}
-					</div>
-				</div>
-			</li>
-	     {forelse}
-	         <li>No entries in feed</li>
-	     {/for}
-	    </ul>
-		<ul class="latest"> 
-		{for entry in latest}
-			<li>
-				<h2>
-					${entry.title}
-				</h2>
-			</li>
-	     {forelse}
-	         <li>No entries in feed</li>
-	     {/for}
-	    </ul>
-	</textarea>
+	<ul id="leaders"></ul>
+	<ul id="latest"></ul>
+
 	<script type="text/javascript" src="jquery-1.3.2.min.js"></script>
-	<script type="text/javascript" src="trimpath-template-1.0.38.js"></script>
 	<script type="text/javascript">
 		var populateTrail = function(url){
 			jQuery.getJSON(url + "/json",
 				function(json){
-					$("div#article-list").html(TrimPath.processDOMTemplate("article-list-template",json));
+					jQuery.each(json.leaders, 
+						function(){
+							var entry = this;
+							var li = $(document.createElement('li')).addClass('content')
+								.append($(document.createElement('h2')).text(entry.title)
+									.click(
+										function(){
+											alert("Preparing to do something clever with: " + entry.guid)
+										}
+									)
+								);
+							
+							if(entry.thumbnail){
+								alert(entry.thumbnail.url);
+								li.append( 
+									$(document.createElement('img'))
+									.attr("src", entry.thumbnail.url)
+									.attr("title", entry.thumbnail.alttext)
+									.attr("class", "thumbnail") );
+							}
+							
+							li.append($(document.createElement('div')).html(entry.description));
+							
+							$('ul#leaders').append(li);
+						}
+					);
+					
+					jQuery.each(json.latest, 
+						function(){
+							var entry = this;
+							$('ul#latest').append(
+								$(document.createElement('li')).addClass('content')
+									.append($(document.createElement('h2')).text(entry.title)
+										.click(
+											function(){
+												alert("Preparing to do something clever with: " + entry.guid)
+											}
+										)
+									)
+							)
+						}
+					);
 				}
 			);
 		}
-		$(document).ready(function(){
+		
+		var activateMenu = function(){
+			$("li.zone").click(
+				function(){
+					populateTrail($(this).attr("name"));
+				}
+			);
+		};
+		
+		$(document).ready(
+			function(){
 				populateTrail("");
-			});
+				activateMenu();
+			}
+		);
 	</script>
 </body>
 </html>
