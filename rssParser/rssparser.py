@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from xml.etree import ElementTree as ET
+from datetime import datetime
+from time import mktime
 import unittest, logging
 
 class RSSParser():
+	date_format = "%a, %d %b %Y %H:%M:%S %Z"
+	
 	namespaces = {
 		'dc' : "{http://purl.org/dc/elements/1.1/}",
 		'media' : '{http://search.yahoo.com/mrss/}'
@@ -35,7 +39,9 @@ class RSSParser():
 		item['guid'] = item_tree.findtext('guid')
 		logging.debug("Parsing item: " + item['guid'])
 		item['title'] = item_tree.findtext('title')
-		item['date'] = item_tree.findtext('pubDate')
+		pub_date = item_tree.findtext('pubDate')
+		item['date'] = pub_date
+		item['sysdate'] = mktime(datetime.strptime(pub_date, self.date_format).timetuple())
 		item['description'] = item_tree.findtext('description')
 		item['creator'] = item_tree.findtext(self.namespaces['dc']+'creator')
 		item.update( self.parse_item_media(item_tree))
@@ -47,8 +53,7 @@ class RSSParser():
 		rsstree = ET.parse(xml)
 		for item in rsstree.findall('/channel/item'):
 			items.append(self.parse_item(item))
-		feed['leaders'] = items[:10]
-		feed['latest'] = items[10:]
+		feed['content'] = items
 		return feed
 
 class RSSParserTest(unittest.TestCase):

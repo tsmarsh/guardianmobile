@@ -92,7 +92,7 @@
 			font-family: georgia;
 			font-size: 17px;
 			font-weight: bold;
-			overflow-x: hidden;
+			overflow-x: -webkit-marquee;
 			overflow-y: hidden;
 			overflow: hidden;
 			white-space: nowrap;
@@ -189,66 +189,160 @@
 
 	<script type="text/javascript" src="jquery-1.3.2.min.js"></script>
 	<script type="text/javascript">
-		var populateTrail = function(url){
-			jQuery.getJSON(url + "/json",
-				function(json){
-					jQuery.each(json.leaders, 
-						function(){
-							var entry = this;
-							var li = $(document.createElement('li')).addClass('content')
-								.append($(document.createElement('h2')).text(entry.title)
-									.click(
-										function(){
-											alert("Preparing to do something clever with: " + entry.guid)
-										}
-									)
-								);
-							
-							if(entry.thumbnail){
-								alert(entry.thumbnail.url);
-								li.append( 
-									$(document.createElement('img'))
-									.attr("src", entry.thumbnail.url)
-									.attr("title", entry.thumbnail.alttext)
-									.attr("class", "thumbnail") );
+		var db; //local database
+		
+		var initialiseDB = function() {
+			window.console.log("Initialising db");
+			db.transaction(
+				function(tx) {
+					tx.executeSql("SELECT COUNT(*) FROM content", [], function(result) {
+							window.console.log("Database already initialised");
+						}, 
+					function(tx, error) {
+						tx.executeSql("CREATE TABLE content (guid TEXT UNIQUE, feed TEXT, title TEXT, date TEXT, sysdate REAL, description TEXT, creator TEXT)", [], 
+							function(result) {
+								window.console.log("Created content table");
 							}
-							
-							li.append($(document.createElement('div')).html(entry.description));
-							
-							$('ul#leaders').append(li);
-						}
-					);
-					
-					jQuery.each(json.latest, 
+						); 
+					})
+				}
+			);
+		};
+		
+		var loadFeed = function(url){
+			window.console.log("Loading feed");
+			jQuery.getJSON(url + "/json", function(json){
+				storeFeed(json, url);
+				populateTrail(url);
+			});
+		};
+		
+		var storeFeed = function(json, url){
+			window.console.log("Storing feed");
+			db.transaction(
+				function(tx) {
+					jQuery.each(json.content, 
 						function(){
-							var entry = this;
-							$('ul#latest').append(
-								$(document.createElement('li')).addClass('content')
-									.append($(document.createElement('h2')).text(entry.title)
-										.click(
-											function(){
-												alert("Preparing to do something clever with: " + entry.guid)
-											}
-										)
-									)
-							)
+							tx.executeSql("INSERT OR REPLACE INTO content(guid, feed, title, date, sysdate, description, creator) VALUES(?,?,?,?,?,?,?)", 
+								[this.guid, url, this.title, this.date, this.sysdate, this.description, this.creator]);
 						}
 					);
 				}
 			);
+			
+		};
+		
+		var resultToEntries = function(rows){
+			var entries = [] 
+			for(var i = 0; i < rows.length; i++){
+				entries[i] = rows[i];
+			}
+			return entries;
+		};
+		 
+		var getLeaders = function(feedUrl){
+			window.console.log("Getting leaders from db");
+			db.transaction(
+				function(tx) {
+					tx.executeSql("SELECT * FROM content ORDER BY sysdate DESC LIMIT 10", [], 
+						function(tx, result){
+							$('ul#leaders').empty();
+							window.console.log("Got leaders: " + result.rows.length);
+							for(var i = 0; i <  result.rows.length; i++){
+								populateLeaders(result.rows.item(i));
+							}
+						}
+					);
+				}
+			);
+		};
+		
+		var getLatest = function(feedUrl){
+			window.console.log("Getting latest from db");
+			db.transaction(
+				function(tx) {
+					tx.executeSql("SELECT * FROM content ORDER BY sysdate DESC LIMIT 10 OFFSET 10", [], 
+						function(tx, result){
+							window.console.log("Got latest: " + result.rows.length);
+							$('ul#latest').empty();
+							for(var i = 0; i <  result.rows.length; i++){
+								populateLatest(result.rows.item(i));
+							}
+						}
+					);
+				}
+			);
+		};
+		
+		var populateLatest = function(entry){
+			window.console.log("Populating building li for latest: " + entry.title);
+			$('ul#latest').append(
+				$(document.createElement('li')).addClass('content')
+					.append($(document.createElement('h2')).text(entry.title)
+						.click(
+							function(){
+								alert("Preparing to do something clever with: " + entry.guid)
+							}
+						)
+					)
+			);
+		};
+		
+		var populateLeaders = function(entry){
+			window.console.log("Populating building li for leader: " + entry.title);
+			var li = $(document.createElement('li')).addClass('content')
+				.append($(document.createElement('h2')).text(entry.title)
+					.click(
+						function(){
+							alert("Preparing to do something clever with: " + entry.guid)
+						}
+					)
+				);
+			
+			if(entry.thumbnail){
+				window.console.log("Building thumbnail: " + entry.thumbnail.url);
+				li.append( 
+					$(document.createElement('img'))
+					.attr("src", entry.thumbnail.url)
+					.attr("title", entry.thumbnail.alttext)
+					.attr("class", "thumbnail") );
+			}
+			
+			li.append($(document.createElement('div')).html(entry.description));
+			
+			$('ul#leaders').append(li);
+		};
+		
+		var populateTrail = function(feedUrl){
+			var leaders = getLeaders(feedUrl);
+			var latest = getLatest(feedUrl);
 		}
 		
 		var activateMenu = function(){
 			$("li.zone").click(
 				function(){
-					populateTrail($(this).attr("name"));
+					loadFeed($(this).attr("name"));
 				}
 			);
 		};
 		
+		try {
+		    if (window.openDatabase) {
+		        window.console.log("Opening db");
+				db = openDatabase("GuardianMobile", "1.0", "Local content cache, for when you're on the move", 5000000);
+				initialiseDB();
+		        if (!db)
+		            alert("Failed to open the database on disk. Probably need to write code that cleans old articles out");
+		    } else
+		        alert("Your phone sucks. Get a real one");
+		} catch(err) { 
+			window.console.log("There was an error: " + err);
+		}
+		
 		$(document).ready(
 			function(){
 				populateTrail("");
+				loadFeed("");
 				activateMenu();
 			}
 		);

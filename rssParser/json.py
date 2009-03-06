@@ -24,7 +24,7 @@ class JSONHandler(webapp.RequestHandler):
 			rest_params = match.group(1)		
 			self.url = "http://www.guardian.co.uk/" + rest_params + "/rss"
 			logging.info("Fetching: " + self.url)
-			response = open('test/networkfront.xml')#StringIO(fetch(self.url).content)
+			response = StringIO(fetch(self.url).content)
 			return response
 			
 	def get(self):
