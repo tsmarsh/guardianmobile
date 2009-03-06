@@ -197,13 +197,18 @@
 				function(tx) {
 					tx.executeSql("SELECT COUNT(*) FROM content", [], function(result) {
 							window.console.log("Database already initialised");
-						}, 
+						},
 					function(tx, error) {
 						tx.executeSql("CREATE TABLE content (guid TEXT UNIQUE, feed TEXT, title TEXT, date TEXT, sysdate REAL, description TEXT, creator TEXT)", [], 
 							function(result) {
 								window.console.log("Created content table");
 							}
-						); 
+						);
+						tx.executeSql("CREATE TABLE thumbnails (guid TEXT UNIQUE, src TEXT, title TEXT)", [], 
+							function(result) {
+								window.console.log("Created thumbnail table");
+							}
+						);
 					})
 				}
 			);
@@ -223,8 +228,17 @@
 				function(tx) {
 					jQuery.each(json.content, 
 						function(){
-							tx.executeSql("INSERT OR REPLACE INTO content(guid, feed, title, date, sysdate, description, creator) VALUES(?,?,?,?,?,?,?)", 
-								[this.guid, url, this.title, this.date, this.sysdate, this.description, this.creator]);
+							tx.executeSql(
+								"INSERT OR REPLACE INTO content(guid, feed, title, date, sysdate, description, creator) VALUES(?,?,?,?,?,?,?)", 
+								[this.guid, url, this.title, this.date, this.sysdate, this.description, this.creator]
+							);
+							
+							if(this.thumbnail){
+								tx.executeSql(
+									"INSERT OR REPLACE INTO thumbnails(guid, src, title) VALUES(?,?,?)",
+									[this.guid, this.thumbnail.url, this.thumbnail.alttext]
+								);
+							}
 						}
 					);
 				}
@@ -244,7 +258,7 @@
 			window.console.log("Getting leaders from db");
 			db.transaction(
 				function(tx) {
-					tx.executeSql("SELECT * FROM content ORDER BY sysdate DESC LIMIT 10", [], 
+					tx.executeSql("SELECT * FROM content WHERE feed = ? ORDER BY sysdate DESC LIMIT 10", [feedUrl], 
 						function(tx, result){
 							$('ul#leaders').empty();
 							window.console.log("Got leaders: " + result.rows.length);
@@ -261,7 +275,7 @@
 			window.console.log("Getting latest from db");
 			db.transaction(
 				function(tx) {
-					tx.executeSql("SELECT * FROM content ORDER BY sysdate DESC LIMIT 10 OFFSET 10", [], 
+					tx.executeSql("SELECT * FROM content WHERE feed = ? ORDER BY sysdate DESC LIMIT 10 OFFSET 10", [feedUrl], 
 						function(tx, result){
 							window.console.log("Got latest: " + result.rows.length);
 							$('ul#latest').empty();
@@ -288,9 +302,35 @@
 			);
 		};
 		
+		var buildThumbnail = function(guid){
+			window.console.log("Building thumbnail");
+			
+			db.transaction(
+				function(tx) {
+					tx.executeSql("SELECT * FROM thumbnails WHERE guid = ?", [guid], 
+						function(tx, result){
+							if(result.rows.length > 0){
+								var thumbnail = result.rows.item(0);
+								window.console.log("Thumbnail: " + thumbnail['src']);
+								window.console.log("trying to append it to:" + "li#" + guid + " div.content")
+								$("li#" + guid + " div.content").html("<p>Moo!</p>");
+								/*
+								.append( 
+									$(document.createElement('img'))
+										.attr("src", thumbnail['src'])
+										.attr("title", thumbnail['title'])
+										.attr("class", "thumbnail")
+								);*/
+							}
+						}
+					)
+				}
+			)
+		}
+		
 		var populateLeaders = function(entry){
 			window.console.log("Populating building li for leader: " + entry.title);
-			var li = $(document.createElement('li')).addClass('content')
+			var li = $(document.createElement('li')).attr("id", entry.guid).addClass('content')
 				.append($(document.createElement('h2')).text(entry.title)
 					.click(
 						function(){
@@ -299,16 +339,9 @@
 					)
 				);
 			
-			if(entry.thumbnail){
-				window.console.log("Building thumbnail: " + entry.thumbnail.url);
-				li.append( 
-					$(document.createElement('img'))
-					.attr("src", entry.thumbnail.url)
-					.attr("title", entry.thumbnail.alttext)
-					.attr("class", "thumbnail") );
-			}
+			buildThumbnail(entry.guid);
 			
-			li.append($(document.createElement('div')).html(entry.description));
+			li.append($(document.createElement('div')).addClass("content").html(entry.description));
 			
 			$('ul#leaders').append(li);
 		};
