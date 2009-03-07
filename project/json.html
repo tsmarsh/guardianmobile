@@ -313,14 +313,13 @@
 								var thumbnail = result.rows.item(0);
 								window.console.log("Thumbnail: " + thumbnail['src']);
 								window.console.log("trying to append it to:" + "li#" + guid + " div.content")
-								$("li#" + guid + " div.content").html("<p>Moo!</p>");
-								/*
-								.append( 
-									$(document.createElement('img'))
-										.attr("src", thumbnail['src'])
-										.attr("title", thumbnail['title'])
-										.attr("class", "thumbnail")
-								);*/
+								$("li#" + guid + " div.content")
+									.prepend( 
+										$(document.createElement('img'))
+											.attr("src", thumbnail['src'])
+											.attr("title", thumbnail['title'])
+											.attr("class", "thumbnail")
+									);
 							}
 						}
 					)

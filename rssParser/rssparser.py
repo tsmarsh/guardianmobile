@@ -36,7 +36,7 @@ class RSSParser():
 	
 	def parse_item(self, item_tree):
 		item = {}
-		item['guid'] = item_tree.findtext('guid')
+		item['guid'] = item_tree.findtext('guid')[len("http://www.guardian.co.uk/"):].replace('/', '-')
 		logging.debug("Parsing item: " + item['guid'])
 		item['title'] = item_tree.findtext('title')
 		pub_date = item_tree.findtext('pubDate')
