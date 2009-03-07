@@ -184,9 +184,11 @@
 			Money
 		</li>
 	</ul>
-	<ul id="leaders"></ul>
-	<ul id="latest"></ul>
-
+	<div id="story"></div>
+	<div id="trail">
+		<ul id="leaders"></ul>
+		<ul id="latest"></ul>
+	</div>
 	<script type="text/javascript" src="jquery-1.3.2.min.js"></script>
 	<script type="text/javascript">
 		var db; //local database
@@ -218,7 +220,6 @@
 			window.console.log("Loading feed");
 			jQuery.getJSON(url + "/json", function(json){
 				storeFeed(json, url);
-				populateTrail(url);
 			});
 		};
 		
@@ -226,32 +227,33 @@
 			window.console.log("Storing feed");
 			db.transaction(
 				function(tx) {
+					var update = false;
 					jQuery.each(json.content, 
 						function(){
 							tx.executeSql(
 								"INSERT OR REPLACE INTO content(guid, feed, title, date, sysdate, description, creator) VALUES(?,?,?,?,?,?,?)", 
-								[this.guid, url, this.title, this.date, this.sysdate, this.description, this.creator]
+								[this.guid, url, this.title, this.date, this.sysdate, this.description, this.creator], 
+								function(tx, result){
+									if(result.rowsAffected > 0){
+										update = true;
+										if(this.thumbnail){
+											tx.executeSql(
+												"INSERT OR REPLACE INTO thumbnails(guid, src, title) VALUES(?,?,?)",
+												[this.guid, this.thumbnail.url, this.thumbnail.alttext]
+											);
+										}
+									}
+								}
 							);
-							
-							if(this.thumbnail){
-								tx.executeSql(
-									"INSERT OR REPLACE INTO thumbnails(guid, src, title) VALUES(?,?,?)",
-									[this.guid, this.thumbnail.url, this.thumbnail.alttext]
-								);
-							}
 						}
 					);
+					if(update){
+						getLeaders(feedUrl);
+						getLatest(feedUrl);
+					}
 				}
 			);
 			
-		};
-		
-		var resultToEntries = function(rows){
-			var entries = [] 
-			for(var i = 0; i < rows.length; i++){
-				entries[i] = rows[i];
-			}
-			return entries;
 		};
 		 
 		var getLeaders = function(feedUrl){
@@ -322,10 +324,29 @@
 									);
 							}
 						}
-					)
+					);
 				}
 			)
-		}
+		};
+		
+		var getStory = function(guid){
+			window.console.log("Getting story: "+ guid);
+			db.transaction(
+				function(tx) {
+					tx.executeSql("SELECT * FROM content WHERE guid = ?", [guid],
+						function(tx, result){
+							window.console.log("Building story: "+ guid);
+							$("div#story").append()
+						}
+					);
+				}
+			);
+		};
+		
+		var transitionToStory = function(guid){
+			$("div#trail").slideUp("fast");
+			buildStory(guid);
+		};
 		
 		var populateLeaders = function(entry){
 			window.console.log("Populating building li for leader: " + entry.title);
@@ -333,7 +354,7 @@
 				.append($(document.createElement('h2')).text(entry.title)
 					.click(
 						function(){
-							alert("Preparing to do something clever with: " + entry.guid)
+							transitionToStory(entry.guid);
 						}
 					)
 				);
@@ -345,15 +366,24 @@
 			$('ul#leaders').append(li);
 		};
 		
+		var updateTrail = function(feedUrl){
+			getLeaders(feedUrl);
+			getLatest(feedUrl);
+			$("div#trail").slideDown("slow");
+		}
 		var populateTrail = function(feedUrl){
-			var leaders = getLeaders(feedUrl);
-			var latest = getLatest(feedUrl);
+			$("div#trail").slideUp("slow", 
+				function(){
+					updateTrail(feedUrl);
+				}
+			);
+			loadFeed(feedUrl);
 		}
 		
 		var activateMenu = function(){
 			$("li.zone").click(
 				function(){
-					loadFeed($(this).attr("name"));
+					populateTrail($(this).attr("name"));
 				}
 			);
 		};
@@ -374,7 +404,6 @@
 		$(document).ready(
 			function(){
 				populateTrail("");
-				loadFeed("");
 				activateMenu();
 			}
 		);
