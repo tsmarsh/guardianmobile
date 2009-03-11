@@ -37,22 +37,27 @@ class RSSParser():
 	def parse_item(self, item_tree):
 		item = {}
 		item['guid'] = item_tree.findtext('guid')[len("http://www.guardian.co.uk/"):].replace('/', '-')
-		logging.debug("Parsing item: " + item['guid'])
-		item['title'] = item_tree.findtext('title')
 		pub_date = item_tree.findtext('pubDate')
-		item['date'] = pub_date
-		item['sysdate'] = mktime(datetime.strptime(pub_date, self.date_format).timetuple())
-		item['description'] = item_tree.findtext('description')
-		item['creator'] = item_tree.findtext(self.namespaces['dc']+'creator')
-		item.update( self.parse_item_media(item_tree))
-		return item
+		if pub_date:		
+			logging.debug("Parsing item: " + item['guid'])
+			item['title'] = item_tree.findtext('title')
+			item['date'] = pub_date
+			item['sysdate'] = mktime(datetime.strptime(pub_date, self.date_format).timetuple())
+			item['description'] = item_tree.findtext('description')
+			item['creator'] = item_tree.findtext(self.namespaces['dc']+'creator')
+			item.update( self.parse_item_media(item_tree))
+			return item
+		else:
+			logging.error("Item: %s has no publicaton date" % item['guid'])
 		
 	def parse(self, xml):
 		feed = {}
 		items = []
 		rsstree = ET.parse(xml)
 		for item in rsstree.findall('/channel/item'):
-			items.append(self.parse_item(item))
+			parsed_item = self.parse_item(item)
+			if parsed_item:
+				items.append(self.parse_item(item))
 		feed['content'] = items
 		return feed
 
