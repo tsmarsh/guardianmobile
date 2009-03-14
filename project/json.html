@@ -237,6 +237,7 @@
 									if(result.rowsAffected > 0){
 										update = true;
 										if(this.thumbnail){
+											window.console.log("Adding storing thumbnail: " + this.thumbnail.url);
 											tx.executeSql(
 												"INSERT OR REPLACE INTO thumbnails(guid, src, title) VALUES(?,?,?)",
 												[this.guid, this.thumbnail.url, this.thumbnail.alttext]
