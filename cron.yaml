@@ -1,0 +1,10 @@
+cron:
+- description: check high freq feeds
+  url: /cron/feeds/high
+  schedule: every 7 minutes
+- description: check mod freq feeds
+  url: /cron/feeds/moderate
+  schedule: every 19 minutes
+- description: check low freq feeds
+  url: /cron/feeds/low
+  schedule: every 29 minutes
