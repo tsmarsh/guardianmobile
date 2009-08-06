@@ -29,6 +29,12 @@ class DetailHandler(webapp.RequestHandler):
 		json['alt_text'] = picture.alt_text
 		json['credit'] = picture.credit
 		return json
+	
+	def buildPictures(self, pictures):
+		pictures = []
+		for key in pictures:
+			pictures.append(self.buildPicture(key))
+		return pictures
 		
 	def buildTag(self, tag_id):
 		json = {}
@@ -38,6 +44,12 @@ class DetailHandler(webapp.RequestHandler):
 		json['type'] = tag.type
 		json['name'] = tag.name
 		return json
+	
+	def buildTags(self, tags):
+		tags = []
+		for key in tags:
+			tags.append(self.buildTag(key))
+		return tags
 	
 	def buildContent(self, content_id):
 		json = {}
@@ -51,27 +63,17 @@ class DetailHandler(webapp.RequestHandler):
 		json['link_text'] = content.link_text
 		json['type'] = content.type
 		json['body'] = content.body
+		json['publication_date'] = content.publication_date
+			
+		json['tags'] = self.buildTags(content.tags)
 		
-		tags = []
-		for key in content.tags:
-			tags.append(self.buildTag(key))
-		json['tags'] = tags
-		
-		pictures = []
-		for key in content.pictures:
-			pictures.append(self.buildPicture(key))
-		json['pictures'] = pictures
-		
-		json['publication_date'] = content.publication_date	
+		json['pictures'] = self.buildPictures(content.pictures)	
 		
 		return json
 	
-	def get(self):
+	def get(self, id):
 		json = {}
-		match = re.search(self.extract_content_id, self.request.path)
-		if match:
-			id = match.group(1)
-			json = self.buildContent(id)
+		json = self.buildContent(id)
 			
 		self.response.out.write(simplejson.dumps(json, cls=ComplexEncoder))
 		
@@ -86,37 +88,40 @@ class SummaryHandler(webapp.RequestHandler):
 		json['credit'] = picture.credit
 		return json
 		
-	def get(self):
+	def get(self, id):
 		json_content = {}
-		match = re.search(self.extract_content_id, self.request.path)
-		if match:
-			id = match.group(1)
-			content = Content.all().filter('id =', id).fetch(1)[0]
-			json_content['headline'] = content.headline
-			json_content['thumbnail'] = self.buildPicture(content.thumbnail)
-			json_content['summary'] = content.trail_text
-			json_content['detail_url'] = self.detail_url + id
-			json_content['section_name'] = content.section_name
+		content = Content.all().filter('id =', id).fetch(1)[0]
+		json_content['headline'] = content.headline
+		json_content['thumbnail'] = self.buildPicture(content.thumbnail)
+		json_content['summary'] = content.trail_text
+		json_content['detail_url'] = self.detail_url + id
+		json_content['section_name'] = content.section_name
 		
 		self.response.out.write(simplejson.dumps(json_content))
 		
 class ListHandler(webapp.RequestHandler):
 	
-	summary_url = host + "/api/summary/"
-		
-	def get(self):
+	summary_url = host + "/api/summary/"	
+
+	def get(self, feed_name):
 		json_feed = []
-		feed = Feed.all().filter("path =", "").fetch(1)[0];
-		for content in feed.content:
-			json_feed.append(self.summary_url+db.get(content).id)
+		if not feed_name:
+			feed_name = ""
+		feed = Feed.all().filter("path =", feed_name).fetch(1);
+		if feed:
+			feed = feed[0]
+			for content in feed.content:
+				content_item = db.get(content)
+				if content_item.section_name:
+					json_feed.append(self.summary_url+content_item.id)
 		
 		self.response.out.write(simplejson.dumps(json_feed))
 		
 def main():
 	application = webapp.WSGIApplication(
-		[(r'/api/list/?.*', ListHandler), 
-		(r'/api/summary/\d+', SummaryHandler),
-		(r'/api/detail/\d+', DetailHandler)], debug=True)
+		[(r'/api/list/?(.*)', ListHandler), 
+		(r'/api/summary/(\d+)', SummaryHandler),
+		(r'/api/detail/(\d+)', DetailHandler)], debug=True)
 		
 	wsgiref.handlers.CGIHandler().run(application)
 
