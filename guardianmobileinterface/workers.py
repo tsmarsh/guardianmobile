@@ -8,6 +8,8 @@ import re, logging, sys, urllib2
 from google.appengine.ext import db
 from guardianapi import Client
 
+link_with_id_finder = re.compile(r".*/email/(\d+)")
+
 class APIWorker(webapp.RequestHandler):
 	"""Grabs the meta data using the id
 	completion of this task marks the story for publishing
@@ -19,7 +21,7 @@ class APIWorker(webapp.RequestHandler):
 		client = Client(self.api_key)
 		content = db.get(self.request.get('key'))
 		api_item = client.item(content.id)
-		logging.info("Working on: " + api_item['web_url'])
+		logging.info("Working on: " + content.web_url)
 		if api_item.has_key('byline'):
 			content.byline = api_item['byline']
 		if not content.publication_date:
@@ -51,11 +53,12 @@ class WebWorker(webapp.RequestHandler):
 	"""Grabs the id and the content for a given url, 
 		puts the url and id on the API worker queue.
 	"""
-	link_with_id_finder = re.compile(r".*/email/(\d+)")
 	
-	def parseId(self, web_page, content):
-		content.id = self.link_with_id_finder.match(web_page.findAll('a', href=self.link_with_id_finder)[0]['href']).group(1)
-	
+	def parseId(self, web_page):
+		matching_links = web_page.findAll('a', href=link_with_id_finder)
+		if matching_links:
+			return link_with_id_finder.match(matching_links[0]['href']).group(0)
+			
 	def parseContent(self, web_page, content):
 		body = web_page.findAll('div', id="article-wrapper")
 		if body:
@@ -66,10 +69,14 @@ class WebWorker(webapp.RequestHandler):
 		url = content.web_url
 		logging.info("Working on: " + url)
 		web_page = BeautifulSoup(urllib2.urlopen(url).read())
-		self.parseId(web_page, content)
-		self.parseContent(web_page, content)
-		task = taskqueue.Task(url="/task/api", params={'key': content.put() })
-		task.add(queue_name='api')
+		id = self.parseId(web_pages)
+		if id:
+			content.id = id
+			self.parseContent(web_page, content)
+			task = taskqueue.Task(url="/task/api", params={'key': content.put() })
+			task.add(queue_name='api')
+		else:
+			content.delete()
 		
 def main():
 	application = webapp.WSGIApplication([('/task/web', WebWorker), ('/task/api', APIWorker)], debug=True)

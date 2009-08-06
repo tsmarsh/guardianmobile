@@ -53,7 +53,7 @@ class Client(object):
     def item(self, item_id):
         try:
             json = self._do_call('/content/item/%s' % item_id)
-        except HTTPError, h:
+        except fetchers.HTTPError, h:
             if str(h.status_code) == '404':
                 raise ItemNotFound(item_id)
             else:

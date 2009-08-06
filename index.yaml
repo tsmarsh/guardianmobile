@@ -11,7 +11,3 @@ indexes:
 # your application using appcfg.py.
 
 # Unused in query history -- copied from input.
-- kind: Feed
-  properties:
-  - name: path
-  - name: section_name
