@@ -52,6 +52,7 @@ class RSSFeedChecker(webapp.RequestHandler):
 			feed_item = Feed.all().filter('path =', feed).fetch(1)
 			if feed_item:
 				feed_item = feed_item[0]
+				feed_item.content = []
 			else:
 				feed_item = Feed(content = [], path = feed)
 			
@@ -70,8 +71,7 @@ class RSSFeedChecker(webapp.RequestHandler):
 						content = content[0]
 						feed_item.content.append(content.put())
 					elem.clear() # won't need the children any more
-					
-		print "Finished getting: " + feed_path
+			feed_item.put()
 		
 def main():
 	application = webapp.WSGIApplication([(r'/cron/feeds/(.*)', RSSFeedChecker)], debug=True)

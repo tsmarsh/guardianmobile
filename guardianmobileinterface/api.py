@@ -6,7 +6,7 @@
 import wsgiref.handlers
 from google.appengine.ext import webapp
 from google.appengine.ext import db
-import simplejson, re
+import simplejson, re, logging
 
 from guardianmobileinterface.model import Feed, Content
 from datetime import datetime
@@ -105,15 +105,19 @@ class ListHandler(webapp.RequestHandler):
 
 	def get(self, feed_name):
 		json_feed = []
-		if not feed_name:
-			feed_name = ""
+		feed_name = feed_name or ""
+		
 		feed = Feed.all().filter("path =", feed_name).fetch(1);
 		if feed:
 			feed = feed[0]
 			for content in feed.content:
 				content_item = db.get(content)
-				if content_item.section_name:
-					json_feed.append(self.summary_url+content_item.id)
+				if content_item and content_item.section_name:
+					json_feed.append(self.summary_url + content_item.id)
+				else: 
+					logging.info("Content item: %s is not ready" % content_item.web_url)
+		else: 
+			logging.info("Couldn't find feed: %s" % feed_name)
 		
 		self.response.out.write(simplejson.dumps(json_feed))
 
@@ -129,7 +133,7 @@ class MetaListHandler(webapp.RequestHandler):
 def main():
 	application = webapp.WSGIApplication(
 		[(r'/api/?', MetaListHandler),
-		(r'/api/list/?(.*)', ListHandler), 
+		(r'/api/list(/?.*)', ListHandler), 
 		(r'/api/summary/(\d+)', SummaryHandler),
 		(r'/api/detail/(\d+)', DetailHandler)], debug=True)
 		

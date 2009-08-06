@@ -23,13 +23,13 @@ class APIWorker(webapp.RequestHandler):
 			logging.info("Content has been deleted, bailing")
 			return
 		
-		logging.info("Working on: " + content.web_url)
+		logging.info("Working on: %s (%s)" % (content.web_url, content.id))
 		api_item = None
 		client = Client(self.api_key)
 		try:
 			api_item = client.item(content.id)
 		except fetchers.HTTPError, e:
-			logging.error("Status code: " + e.status_code + "\tDetails: " + e.info)
+			logging.error("Status code: %d\tDetails: %s" % (e.status_code, e.info))
 			raise
 		if api_item.has_key('byline'):
 			content.byline = api_item['byline']
@@ -66,7 +66,7 @@ class WebWorker(webapp.RequestHandler):
 	def parseId(self, web_page):
 		matching_links = web_page.findAll('a', href=link_with_id_finder)
 		if matching_links:
-			return link_with_id_finder.match(matching_links[0]['href']).group(0)
+			return link_with_id_finder.match(matching_links[0]['href']).group(1)
 			
 	def parseContent(self, web_page, content):
 		body = web_page.findAll('div', id="article-wrapper")
