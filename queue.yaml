@@ -4,4 +4,4 @@ queue:
   bucket_size: 20
 - name: api
   rate: 1/s
-  bucket_size: 20
+  bucket_size: 1

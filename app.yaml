@@ -10,4 +10,5 @@ handlers:
   script: guardianmobileinterface/workers.py
 - url: /api/.*
   script: guardianmobileinterface/api.py
-
+- url: /admin/.*
+  script: guardianmobileinterface/admin.py

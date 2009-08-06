@@ -6,7 +6,7 @@ from guardianmobileinterface.model import Tag, Content, Picture
 import re, logging, sys, urllib2
 
 from google.appengine.ext import db
-from guardianapi import Client
+from guardianapi import Client, fetchers
 
 link_with_id_finder = re.compile(r".*/email/(\d+)")
 
@@ -18,10 +18,19 @@ class APIWorker(webapp.RequestHandler):
 	api_key = 'gkpt4266xexmg7ctn634g8gs'
 	
 	def post(self):
-		client = Client(self.api_key)
 		content = db.get(self.request.get('key'))
-		api_item = client.item(content.id)
+		if not content:
+			logging.info("Content has been deleted, bailing")
+			return
+		
 		logging.info("Working on: " + content.web_url)
+		api_item = None
+		client = Client(self.api_key)
+		try:
+			api_item = client.item(content.id)
+		except fetchers.HTTPError, e:
+			logging.error("Status code: " + e.status_code + "\tDetails: " + e.info)
+			raise
 		if api_item.has_key('byline'):
 			content.byline = api_item['byline']
 		if not content.publication_date:
@@ -66,10 +75,14 @@ class WebWorker(webapp.RequestHandler):
 		
 	def post(self):
 		content = db.get(self.request.get('key'))
+		if not content:
+			logging.info("Content has been deleted, bailing")
+			return
+		
 		url = content.web_url
 		logging.info("Working on: " + url)
 		web_page = BeautifulSoup(urllib2.urlopen(url).read())
-		id = self.parseId(web_pages)
+		id = self.parseId(web_page)
 		if id:
 			content.id = id
 			self.parseContent(web_page, content)

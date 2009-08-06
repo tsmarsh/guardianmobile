@@ -45,11 +45,8 @@ class RSSFeedChecker(webapp.RequestHandler):
 		self.parse_item_media(item, content)
 		return content	
 	
-	def get(self):
-		match = re.search(r'/cron/feeds/(.*)', self.request.path)
-		if not match:
-			return
-		feeds = all_feeds[match.group(1)]
+	def get(self, feed_path):
+		feeds = all_feeds[feed_path]
 		
 		for feed in feeds:
 			feed_item = Feed.all().filter('path =', feed).fetch(1)
@@ -57,24 +54,27 @@ class RSSFeedChecker(webapp.RequestHandler):
 				feed_item = feed_item[0]
 			else:
 				feed_item = Feed(content = [], path = feed)
-		
 			
 			logging.info(root % feed)
-			rsstree = ET.parse(urllib2.urlopen(root % feed))
-			for item in rsstree.findall('/channel/item'):
-				content = Content.all().filter('web_url =', item.findtext('link')).fetch(1)
-				if not content:
-					content = self.buildContent(item)
-					key = content.put()
-					feed_item.content.append(key)
-					taskqueue.add(url='/task/web', params={'key': key})
-				else:
-					content = content[0]
-					feed_item.content.append(content.put())
-				feed_item.put()
+			
+			for event, elem in ET.iterparse(urllib2.urlopen(root % feed)):
+				if elem.tag == "item":
+					link = elem.findtext("link")
+					content = Content.all().filter('web_url =', link).fetch(1)
+					if not content:
+						content = self.buildContent(elem)
+						key = content.put()
+						feed_item.content.append(key)
+						taskqueue.add(url='/task/web', params={'key': key})
+					else:
+						content = content[0]
+						feed_item.content.append(content.put())
+					elem.clear() # won't need the children any more
+					
+		print "Finished getting: " + feed_path
 		
 def main():
-	application = webapp.WSGIApplication([(r'/cron/feeds/.*', RSSFeedChecker)], debug=True)
+	application = webapp.WSGIApplication([(r'/cron/feeds/(.*)', RSSFeedChecker)], debug=True)
 	wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':
