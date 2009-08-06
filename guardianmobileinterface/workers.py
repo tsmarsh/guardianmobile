@@ -19,7 +19,7 @@ class APIWorker(webapp.RequestHandler):
 		client = Client(self.api_key)
 		content = db.get(self.request.get('key'))
 		api_item = client.item(content.id)
-		
+		logging.info("Working on: " + api_item['web_url'])
 		if api_item.has_key('byline'):
 			content.byline = api_item['byline']
 		if not content.publication_date:

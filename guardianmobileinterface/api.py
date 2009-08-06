@@ -10,7 +10,7 @@ import simplejson, re
 
 from guardianmobileinterface.model import Feed, Content
 from datetime import datetime
-
+from guardianmobileinterface.cron import all_feeds
 host = "http://superguardianmobile.appspot.com"
 
 class ComplexEncoder(simplejson.JSONEncoder):
@@ -116,10 +116,20 @@ class ListHandler(webapp.RequestHandler):
 					json_feed.append(self.summary_url+content_item.id)
 		
 		self.response.out.write(simplejson.dumps(json_feed))
-		
+
+class MetaListHandler(webapp.RequestHandler):
+	def get(self):
+		json = []
+		for _, list_of_endpoints in all_feeds.iteritems():
+			for endpoint in list_of_endpoints:
+				json.append(host + "/api/list" + endpoint)
+				
+		self.response.out.write(simplejson.dumps(json))
+			
 def main():
 	application = webapp.WSGIApplication(
-		[(r'/api/list/?(.*)', ListHandler), 
+		[(r'/api/?', MetaListHandler),
+		(r'/api/list/?(.*)', ListHandler), 
 		(r'/api/summary/(\d+)', SummaryHandler),
 		(r'/api/detail/(\d+)', DetailHandler)], debug=True)
 		
