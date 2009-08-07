@@ -115,7 +115,10 @@ class ListHandler(webapp.RequestHandler):
 				if content_item and content_item.section_name:
 					json_feed.append(self.summary_url + content_item.id)
 				else: 
-					logging.info("Content item: %s is not ready" % content_item.web_url)
+					if content_item:
+						logging.info("Content item: %s is not ready" % content_item.web_url)
+					else:
+						logging.info("Content item missing in action")
 		else: 
 			logging.info("Couldn't find feed: %s" % feed_name)
 		

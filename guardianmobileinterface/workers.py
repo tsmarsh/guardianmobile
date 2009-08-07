@@ -30,7 +30,8 @@ class APIWorker(webapp.RequestHandler):
 			api_item = client.item(content.id)
 		except fetchers.HTTPError, e:
 			logging.error("Status code: %d\tDetails: %s" % (e.status_code, e.info))
-			raise
+			content.delete()
+			return
 		if api_item.has_key('byline'):
 			content.byline = api_item['byline']
 		if not content.publication_date:

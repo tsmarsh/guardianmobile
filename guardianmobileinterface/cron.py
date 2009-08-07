@@ -4,8 +4,9 @@ from xml.etree import ElementTree as ET
 from google.appengine.ext import webapp
 from google.appengine.api.labs import taskqueue
 import urllib2, logging, re
-from guardianmobileinterface.model import Content, Picture, Feed
 from datetime import datetime
+from guardianmobileinterface.model import Content, Picture, Feed
+from datetime import datetime, timedelta
 from time import mktime
 from google.appengine.ext import db
 
@@ -72,9 +73,18 @@ class RSSFeedChecker(webapp.RequestHandler):
 						feed_item.content.append(content.put())
 					elem.clear() # won't need the children any more
 			feed_item.put()
+			
+class DeleteOldContent(webapp.RequestHandler):
+	def get(self):
+		old_content = Content.all().filter('publication_date >', datetime.now() - timedelta(-1))
+		logging.info("Found %d old content to delete" % len(old_content))
 		
+		for content in old_content:
+			content.delete()
+	
 def main():
-	application = webapp.WSGIApplication([(r'/cron/feeds/(.*)', RSSFeedChecker)], debug=True)
+	application = webapp.WSGIApplication([(r'/cron/feeds/(.*)', RSSFeedChecker)
+										(r'/cron/remove_old', DeleteOldContent)], debug=True)
 	wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':
