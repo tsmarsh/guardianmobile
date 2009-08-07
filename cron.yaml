@@ -8,3 +8,8 @@ cron:
 - description: check low freq feeds
   url: /cron/feeds/low
   schedule: every 29 minutes
+- description: Removes old content as per eula
+  url: /cron/remove_old
+  schedule: every 24 hours
+
+ 

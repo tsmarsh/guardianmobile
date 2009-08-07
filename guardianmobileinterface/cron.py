@@ -24,8 +24,8 @@ class RSSFeedChecker(webapp.RequestHandler):
 	date_format = "%a, %d %b %Y %H:%M:%S %Z"
 	
 	def parse_item_media(self, item, content_item):
-		contents = item.findall('{http://search.yahoo.com/mrss/}content')
-		for content in contents:
+		media = item.findall('{http://search.yahoo.com/mrss/}content')
+		for content in media:
 			picture = Picture()
 			picture.url = db.Link(content.get('url'))
 			picture.alt_text = db.Text(content.findtext('{http://search.yahoo.com/mrss/}description'))
@@ -77,13 +77,16 @@ class RSSFeedChecker(webapp.RequestHandler):
 class DeleteOldContent(webapp.RequestHandler):
 	def get(self):
 		old_content = Content.all().filter('publication_date >', datetime.now() - timedelta(-1))
-		logging.info("Found %d old content to delete" % len(old_content))
 		
+		count = 0
 		for content in old_content:
+			count = count + 1
 			content.delete()
+			
+		logging.info("Found %d old content to delete" % count)
 	
 def main():
-	application = webapp.WSGIApplication([(r'/cron/feeds/(.*)', RSSFeedChecker)
+	application = webapp.WSGIApplication([(r'/cron/feeds/(.*)', RSSFeedChecker),
 										(r'/cron/remove_old', DeleteOldContent)], debug=True)
 	wsgiref.handlers.CGIHandler().run(application)
 
