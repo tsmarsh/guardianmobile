@@ -141,7 +141,8 @@ class MetaListHandler(JSONOutputHandler):
 		json = []
 		for _, list_of_endpoints in all_feeds.iteritems():
 			for endpoint in list_of_endpoints:
-				json.append(host + "/api/list" + endpoint)
+				endpoint['path'] = host + "/api/list" + endpoint['path']
+				json.append(endpoint)
 		
 		self.returnJSON(json)
 

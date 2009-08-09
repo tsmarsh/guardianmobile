@@ -10,10 +10,27 @@ from datetime import datetime, timedelta
 root = "http://www.guardian.co.uk%s/rss"
 
 all_feeds = {
-	'high': ["", "/uk", "/world", "/sport", "/football"],
-	'moderate': ["/politics", "/world/usa", "/film", "/music" ],
-	'low': ["/science", "/technology", "/environment", "/travel", "/culture", "/society"]
-}
+	'high': [
+				{"path": "", 	"link_text" : "Front page"}, 
+				{"path": "/uk", "link_text" : "UK news"}, 
+				{"path": "/world",	"link_text" :"World news"}, 
+				{"path": "/sport", 	"link_text" : "Sport"}, 
+				{"path": "/football", 	"link_text" : "Football"},
+			],
+	'moderate': [
+			{"path": "/politics", 	"link_text" :  "Politics"}, 
+			{"path": "/world/usa", 	"link_text" :  "USA News"}, 
+			{"path": "/film", 	"link_text" :  "Film"}, 
+			{"path": "/music", 	"link_text" :  "Music"}, 
+				],
+	'low': [
+		{"path": "/science", 	"link_text" :   "Science"}, 
+		{"path": "/technology", 	"link_text" :   "Technology"}, 
+		{"path": "/environment", 	"link_text" :   "Environment"}, 
+		{"path": "/travel", 	"link_text" :   "Travel"}, 
+		{"path": "/culture", 	"link_text" :   "Culture"}, 
+		{"path": "/society", 	"link_text" :   "Society"}],
+	}
 
 
 class RSSFeedChecker(webapp.RequestHandler):
@@ -22,18 +39,15 @@ class RSSFeedChecker(webapp.RequestHandler):
 		feeds = all_feeds[feed_path]
 		
 		for feed in feeds:
-			feed_item = Feed.all().filter('path =', feed).fetch(1)
+			feed_item = Feed.all().filter('path =', feed['path']).fetch(1)
 			if feed_item:
 				feed_item = feed_item[0]
 				feed_item.content = []
 			else:
-				feed_item = Feed(content = [], path = feed)
+				feed_item = Feed(content =[], path = feed['path'])
 				
 			key = feed_item.put()
-			
-			taskqueue.add(url='/task/rss', params={'key': key, 'url': root % feed})
-
-			feed_item.put()
+			taskqueue.add(url='/task/rss', params={'key': key, 'url': root % feed['path']})
 			
 class DeleteOldContent(webapp.RequestHandler):
 	def get(self):
