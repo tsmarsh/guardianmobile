@@ -82,6 +82,8 @@ class SummaryHandler(webapp.RequestHandler):
 	detail_url = host + "/api/detail/"
 	
 	def buildPicture(self, picture):
+		if not picture:
+			return
 		json = {}
 		json['url'] = picture.url
 		json['alt_text'] = picture.alt_text
