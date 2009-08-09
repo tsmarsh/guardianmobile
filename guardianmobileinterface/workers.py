@@ -3,10 +3,12 @@ from google.appengine.ext import webapp
 from google.appengine.api.labs import taskqueue
 from BeautifulSoup import BeautifulSoup
 from guardianmobileinterface.model import Tag, Content, Picture
-import re, logging, sys, urllib2
+
+from guardianmobileinterface.settings import api_key
+import re, logging, sys, urllib2, time
 
 from google.appengine.ext import db
-from guardianapi import Client, fetchers
+from guardianapi import Client, fetchers, errors
 
 link_with_id_finder = re.compile(r".*/email/(\d+)")
 
@@ -14,8 +16,6 @@ class APIWorker(webapp.RequestHandler):
 	"""Grabs the meta data using the id
 	completion of this task marks the story for publishing
 	"""
-	
-	api_key = 'gkpt4266xexmg7ctn634g8gs'
 	
 	def post(self):
 		content = db.get(self.request.get('key'))
@@ -25,13 +25,21 @@ class APIWorker(webapp.RequestHandler):
 		
 		logging.info("Working on: %s (%s)" % (content.web_url, content.id))
 		api_item = None
-		client = Client(self.api_key)
-		try:
-			api_item = client.item(content.id)
-		except fetchers.HTTPError, e:
-			logging.error("Status code: %d\tDetails: %s" % (e.status_code, e.info))
-			content.delete()
-			return
+		client = Client(api_key)
+		
+		for _ in range(8):
+			try:
+				api_item = client.item(content.id)
+				break
+			except fetchers.HTTPError, e:
+				logging.error("Status code: %d\tDetails: %s" % (e.status_code, e.info))
+				logging.info("Content is not in api, deleting")
+				content.delete()
+				return
+			except errors.APIKeyError, e:
+				logging.error("API being hit too hard")
+				time.sleep(1)
+			
 		if api_item.has_key('byline'):
 			content.byline = api_item['byline']
 		if not content.publication_date:

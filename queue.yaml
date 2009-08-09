@@ -3,5 +3,5 @@ queue:
   rate: 9/s
   bucket_size: 20
 - name: api
-  rate: 1/s
+  rate: 50/m
   bucket_size: 1
