@@ -92,10 +92,6 @@ class WebWorker(webapp.RequestHandler):
 			return
 		
 		url = content.web_url
-		if not re.search(r'guardian.co.uk', url):
-			logging.info("None guardian url, bailing (%s)" % url)
-			content.delete()
-			return
 			
 		logging.info("Working on: " + url)
 		
@@ -146,16 +142,21 @@ class RSSWorker(webapp.RequestHandler):
 		for event, elem in ET.iterparse(urllib2.urlopen(url)):
 			if elem.tag == "item":
 				link = elem.findtext("link")
-				content = Content.all().filter('web_url =', link).fetch(1)
-				if not content:
-					content = self.buildContent(elem)
-					key = content.put()
-					feed_item.content.append(key)
-					taskqueue.add(url='/task/web', params={'key': key})
+				if re.search(r'guardian.co.uk', link):
+					content = Content.all().filter('web_url =', link).fetch(1)
+					if not content:
+						content = self.buildContent(elem)
+						key = content.put()
+						feed_item.content.append(key)
+						taskqueue.add(url='/task/web', params={'key': key})
+					else:
+						content = content[0]
+						feed_item.content.append(content.put())
+					elem.clear() # won't need the children any more
 				else:
-					content = content[0]
-					feed_item.content.append(content.put())
-				elem.clear() # won't need the children any more
+					logging.info("None guardian url, bailing (%s)" % link)
+					content.delete()
+				
 		feed_item.put()
 
 class DeleteOldContentWorker(webapp.RequestHandler):
