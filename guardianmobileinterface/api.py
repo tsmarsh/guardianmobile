@@ -24,7 +24,7 @@ class JSONOutputHandler(webapp.RequestHandler):
 		callback = self.request.get('callback')
 		if callback:
 			self.response.out.write("%s ( " % callback)
-		simplejson.dump(json, self.response.out)
+		simplejson.dump(json, self.response.out, cls=ComplexEncoder)
 		if callback:
 			self.response.out.write(" )")
 	
