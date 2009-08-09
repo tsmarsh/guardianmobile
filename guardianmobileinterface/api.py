@@ -18,8 +18,17 @@ class ComplexEncoder(simplejson.JSONEncoder):
 		if isinstance(obj, datetime):
 			return obj.strftime("%a, %d %b %Y %H:%M:%S +0000")
 		return simplejson.JSONEncoder.default(self, obj)
-		
-class DetailHandler(webapp.RequestHandler):
+
+class JSONOutputHandler(webapp.RequestHandler):
+	def returnJSON(self, json):
+		callback = self.request.get('callback')
+		if callback:
+			self.response.out.write("%s ( " % callback)
+		simplejson.dump(json, self.response.out)
+		if callback:
+			self.response.out.write(" )")
+	
+class DetailHandler(JSONOutputHandler):
 	extract_content_id = r'/api/detail/(\d+)'
 	
 	def buildPicture(self, picture_id):
@@ -75,9 +84,9 @@ class DetailHandler(webapp.RequestHandler):
 		json = {}
 		json = self.buildContent(id)
 			
-		self.response.out.write(simplejson.dumps(json, cls=ComplexEncoder))
+		self.returnJSON(json)
 		
-class SummaryHandler(webapp.RequestHandler):
+class SummaryHandler(JSONOutputHandler):
 	extract_content_id = r'/api/summary/(\d+)'
 	detail_url = host + "/api/detail/"
 	
@@ -99,9 +108,9 @@ class SummaryHandler(webapp.RequestHandler):
 		json_content['detail_url'] = self.detail_url + id
 		json_content['section_name'] = content.section_name
 		
-		self.response.out.write(simplejson.dumps(json_content))
+		self.returnJSON(json_content)
 		
-class ListHandler(webapp.RequestHandler):
+class ListHandler(JSONOutputHandler):
 	
 	summary_url = host + "/api/summary/"	
 
@@ -124,16 +133,18 @@ class ListHandler(webapp.RequestHandler):
 		else: 
 			logging.info("Couldn't find feed: %s" % feed_name)
 		
-		self.response.out.write(simplejson.dumps(json_feed))
+		self.returnJSON(json_feed)
 
-class MetaListHandler(webapp.RequestHandler):
+class MetaListHandler(JSONOutputHandler):
+			
 	def get(self):
 		json = []
 		for _, list_of_endpoints in all_feeds.iteritems():
 			for endpoint in list_of_endpoints:
 				json.append(host + "/api/list" + endpoint)
-				
-		self.response.out.write(simplejson.dumps(json))
+		
+		self.returnJSON(json)
+
 			
 def main():
 	application = webapp.WSGIApplication(
