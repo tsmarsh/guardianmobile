@@ -63,6 +63,7 @@ class DetailHandler(JSONOutputHandler):
 	def buildContent(self, content_id):
 		json = {}
 		content = Content.all().filter('id =', content_id).fetch(1)[0]
+		json['id'] = content_id
 		json['byline'] = content.byline
 		json['publication'] = content.publication
 		json['section_name'] = content.section_name 
@@ -102,6 +103,7 @@ class SummaryHandler(JSONOutputHandler):
 	def get(self, id):
 		json_content = {}
 		content = Content.all().filter('id =', id).fetch(1)[0]
+		json_content['id'] = id
 		json_content['headline'] = content.headline
 		json_content['thumbnail'] = self.buildPicture(content.thumbnail)
 		json_content['summary'] = content.trail_text
