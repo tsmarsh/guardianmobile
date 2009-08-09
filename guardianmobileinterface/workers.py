@@ -74,6 +74,7 @@ class WebWorker(webapp.RequestHandler):
 		puts the url and id on the API worker queue.
 	"""
 	
+	
 	def parseId(self, web_page):
 		matching_links = web_page.findAll('a', href=link_with_id_finder)
 		if matching_links:
@@ -91,7 +92,13 @@ class WebWorker(webapp.RequestHandler):
 			return
 		
 		url = content.web_url
+		if not re.search(r'guardian.co.uk', url):
+			logging.info("None guardian url, bailing (%s)" % url)
+			content.delete()
+			return
+			
 		logging.info("Working on: " + url)
+		
 		web_page = BeautifulSoup(urllib2.urlopen(url).read())
 		id = self.parseId(web_page)
 		if id:
@@ -170,8 +177,8 @@ def main():
 	application = webapp.WSGIApplication(
 		[('/task/web', WebWorker), 
 		('/task/api', APIWorker),
-		('/task/rss', DeleteOldContentWorker),
-		('/task/deleteold', RSSWorker)], debug=True)
+		('/task/rss', RSSWorker),
+		('/task/deleteold', DeleteOldContentWorker)], debug=True)
 	wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':
