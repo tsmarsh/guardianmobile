@@ -10,6 +10,6 @@ cron:
   schedule: every 29 minutes
 - description: Removes old content as per eula
   url: /cron/remove_old
-  schedule: every 6 hours
+  schedule: every day 00:00
 
  
