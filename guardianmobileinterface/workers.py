@@ -2,7 +2,9 @@ import wsgiref.handlers
 from google.appengine.ext import webapp
 from google.appengine.api.labs import taskqueue
 from BeautifulSoup import BeautifulSoup
-from guardianmobileinterface.model import Tag, Content, Picture
+from guardianmobileinterface.model import Tag, Content, Picture, Feed
+from xml.etree import ElementTree as ET
+from datetime import datetime
 
 from guardianmobileinterface.settings import api_key
 import re, logging, sys, urllib2, time
@@ -99,9 +101,77 @@ class WebWorker(webapp.RequestHandler):
 			task.add(queue_name='api')
 		else:
 			content.delete()
+
+class RSSWorker(webapp.RequestHandler):
+
+	date_format = "%a, %d %b %Y %H:%M:%S %Z"
+
+	def parse_item_media(self, item, content_item):
+		media = item.findall('{http://search.yahoo.com/mrss/}content')
+		for content in media:
+			picture = Picture()
+			picture.url = db.Link(content.get('url'))
+			picture.alt_text = db.Text(content.findtext('{http://search.yahoo.com/mrss/}description'))
+			picture.credit = content.findtext('{http://search.yahoo.com/mrss/}credit')
+			picture.put()
+
+			if content.get('width') == '140':
+				content_item.thumbnail = picture
+			else:	
+				content_item.pictures.append(picture.key())
+
+	def buildContent(self, item):
+		content = Content()	
+		pub_date = item.findtext('pubDate')
+		if pub_date:
+			content.publication_date = datetime.strptime(pub_date, self.date_format)
+		content.web_url = db.Link(item.findtext('link'))
+		self.parse_item_media(item, content)
+		return content
+
+	def post(self):
+		
+		feed_item = db.get(self.request.get('key'))
+		url = self.request.get('url')
+
+		logging.info("Working on: " + url)
+		
+		for event, elem in ET.iterparse(urllib2.urlopen(url)):
+			if elem.tag == "item":
+				link = elem.findtext("link")
+				content = Content.all().filter('web_url =', link).fetch(1)
+				if not content:
+					content = self.buildContent(elem)
+					key = content.put()
+					feed_item.content.append(key)
+					taskqueue.add(url='/task/web', params={'key': key})
+				else:
+					content = content[0]
+					feed_item.content.append(content.put())
+				elem.clear() # won't need the children any more
+		feed_item.put()
+
+class DeleteOldContentWorker(webapp.RequestHandler):
+	"""Required because """
+	def post(self):
+		content = db.get(self.request.get('key'))
+		if content:
+			logging.info("Deleting content: %s" % content.web_url)
+			if content.thumbnail:
+				content.thumbnail.delete()
+			for tag in content.tags:
+				tag.delete()
+			for picture in content.pictures:
+				picture.delete()
+			
+			content.delete()
 		
 def main():
-	application = webapp.WSGIApplication([('/task/web', WebWorker), ('/task/api', APIWorker)], debug=True)
+	application = webapp.WSGIApplication(
+		[('/task/web', WebWorker), 
+		('/task/api', APIWorker),
+		('/task/rss', DeleteOldContentWorker),
+		('/task/deleteold', RSSWorker)], debug=True)
 	wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':

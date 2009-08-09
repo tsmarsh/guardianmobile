@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 import wsgiref.handlers
-from xml.etree import ElementTree as ET
 from google.appengine.ext import webapp
 from google.appengine.api.labs import taskqueue
 import urllib2, logging, re
-from datetime import datetime
-from guardianmobileinterface.model import Content, Picture, Feed
-from datetime import datetime, timedelta
-from time import mktime
+from guardianmobileinterface.model import Feed, Content
 from google.appengine.ext import db
+from datetime import datetime, timedelta
 
 root = "http://www.guardian.co.uk%s/rss"
 
@@ -18,34 +15,9 @@ all_feeds = {
 	'low': ["/science", "/technology", "/environment", "/travel", "/culture", "/society"]
 }
 
-class RSSFeedChecker(webapp.RequestHandler):
-	"""Should run every 10 mins"""
 
-	date_format = "%a, %d %b %Y %H:%M:%S %Z"
-	
-	def parse_item_media(self, item, content_item):
-		media = item.findall('{http://search.yahoo.com/mrss/}content')
-		for content in media:
-			picture = Picture()
-			picture.url = db.Link(content.get('url'))
-			picture.alt_text = db.Text(content.findtext('{http://search.yahoo.com/mrss/}description'))
-			picture.credit = content.findtext('{http://search.yahoo.com/mrss/}credit')
-			picture.put()
-			
-			if content.get('width') == '140':
-				content_item.thumbnail = picture
-			else:	
-				content_item.pictures.append(picture.key())
-	
-	def buildContent(self, item):
-		content = Content()	
-		pub_date = item.findtext('pubDate')
-		if pub_date:
-			content.publication_date = datetime.strptime(pub_date, self.date_format)
-		content.web_url = db.Link(item.findtext('link'))
-		self.parse_item_media(item, content)
-		return content	
-	
+class RSSFeedChecker(webapp.RequestHandler):
+
 	def get(self, feed_path):
 		feeds = all_feeds[feed_path]
 		
@@ -56,34 +28,24 @@ class RSSFeedChecker(webapp.RequestHandler):
 				feed_item.content = []
 			else:
 				feed_item = Feed(content = [], path = feed)
+				
+			key = feed_item.put()
 			
-			logging.info(root % feed)
-			
-			for event, elem in ET.iterparse(urllib2.urlopen(root % feed)):
-				if elem.tag == "item":
-					link = elem.findtext("link")
-					content = Content.all().filter('web_url =', link).fetch(1)
-					if not content:
-						content = self.buildContent(elem)
-						key = content.put()
-						feed_item.content.append(key)
-						taskqueue.add(url='/task/web', params={'key': key})
-					else:
-						content = content[0]
-						feed_item.content.append(content.put())
-					elem.clear() # won't need the children any more
+			taskqueue.add(url='/task/rss', params={'key': key, 'url': root % feed})
+
 			feed_item.put()
 			
 class DeleteOldContent(webapp.RequestHandler):
 	def get(self):
+		logging.info("Deleting old content")
 		old_content = Content.all().filter('publication_date >', datetime.now() - timedelta(-1))
 		
 		count = 0
 		for content in old_content:
 			count = count + 1
-			content.delete()
+			taskqueue.add(url='/task/deleteold', params={'key': content.key()})
 			
-		logging.info("Found %d old content to delete" % count)
+		logging.info("Marked %d content for deletion" % count)
 	
 def main():
 	application = webapp.WSGIApplication([(r'/cron/feeds/(.*)', RSSFeedChecker),
