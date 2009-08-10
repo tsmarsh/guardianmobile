@@ -142,8 +142,14 @@ class MetaListHandler(JSONOutputHandler):
 			
 	def get(self):
 		json = []
-		
-		self.returnJSON(all_feeds)
+		for feed in all_feeds:
+			item = {}
+			item['path'] = host + "/api/list" + feed['path']
+			item['link_text'] = feed['link_text']
+			item['zone'] = feed['zone']
+			json.append(item)
+
+		self.returnJSON(json)
 
 			
 def main():
