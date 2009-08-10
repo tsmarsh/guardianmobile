@@ -14,6 +14,17 @@ from guardianapi import Client, fetchers, errors
 
 link_with_id_finder = re.compile(r".*/email/(\d+)")
 
+
+#Many thanks to the Django team for this snippet.
+url_re = re.compile(
+	r'^https?://' # http:// or https://
+	r'(?:(?:[A-Z0-9]+(?:-*[A-Z0-9]+)*\.)+[A-Z]{2,6}|' #domain...
+	r'localhost|' #localhost...
+	r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+	r'(?::\d+)?' # optional port
+	r'(?:/?|/\S+)$', re.IGNORECASE)
+	
+	
 class APIWorker(webapp.RequestHandler):
 	"""Grabs the meta data using the id
 	completion of this task marks the story for publishing
@@ -92,6 +103,9 @@ class WebWorker(webapp.RequestHandler):
 			return
 		
 		url = content.web_url
+		if not url_re.match(url):
+			logging.info("Sent bad url, bailing and removing task: " + url)
+			return #bogus url bail and remove task
 			
 		logging.info("Working on: " + url)
 		
@@ -136,7 +150,11 @@ class RSSWorker(webapp.RequestHandler):
 		
 		feed_item = db.get(self.request.get('key'))
 		url = self.request.get('url')
-
+		
+		if not url_re.match(url):
+			logging.info("Sent bad url, bailing and removing task: " + url)
+			return #bogus url bail and remove task
+			
 		logging.info("Working on: " + url)
 		
 		for event, elem in ET.iterparse(urllib2.urlopen(url)):
