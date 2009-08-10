@@ -21,6 +21,7 @@ class ComplexEncoder(simplejson.JSONEncoder):
 
 class JSONOutputHandler(webapp.RequestHandler):
 	def returnJSON(self, json):
+		self.response.headers['Content-type'] = "application/json"
 		callback = self.request.get('callback')
 		if callback:
 			self.response.out.write("%s ( " % callback)
@@ -142,14 +143,7 @@ class MetaListHandler(JSONOutputHandler):
 	def get(self):
 		json = []
 		
-		for _, list_of_endpoints in all_feeds.iteritems():
-			for endpoint in list_of_endpoints:
-				json.append(
-					{"path" :		host + "/api/list" + endpoint['path'], 
-					'link_text':	endpoint['link_text'], }
-				)
-		
-		self.returnJSON(json)
+		self.returnJSON(all_feeds)
 
 			
 def main():

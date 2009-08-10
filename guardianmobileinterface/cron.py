@@ -9,43 +9,44 @@ from datetime import datetime, timedelta
 
 root = "http://www.guardian.co.uk%s/rss"
 
-all_feeds = {
-	'high': [
-				{"path": "", 	"link_text" : "Front page"}, 
-				{"path": "/uk", "link_text" : "UK news"}, 
-				{"path": "/world",	"link_text" :"World news"}, 
-				{"path": "/sport", 	"link_text" : "Sport"}, 
-				{"path": "/football", 	"link_text" : "Football"},
-			],
-	'moderate': [
-			{"path": "/politics", 	"link_text" :  "Politics"}, 
-			{"path": "/world/usa", 	"link_text" :  "USA News"}, 
-			{"path": "/film", 	"link_text" :  "Film"}, 
-			{"path": "/music", 	"link_text" :  "Music"}, 
-				],
-	'low': [
-		{"path": "/science", 	"link_text" :   "Science"}, 
-		{"path": "/technology", 	"link_text" :   "Technology"}, 
-		{"path": "/environment", 	"link_text" :   "Environment"}, 
-		{"path": "/travel", 	"link_text" :   "Travel"}, 
-		{"path": "/culture", 	"link_text" :   "Culture"}, 
-		{"path": "/society", 	"link_text" :   "Society"}],
-	}
+all_feeds = [
+	{"path": "", 				"link_text" : "Front page", 		"zone" : "news"}, 
+	{"path": "/uk",				"link_text" : "UK news", 			"zone" : "news"}, 
+	{"path": "/world",			"link_text" : "World news", 		"zone" : "news"}, 
+	{"path": "/world/usa", 		"link_text" : "USA News", 			"zone" : "news"},
+	{"path": "/politics", 		"link_text" : "Politics", 			"zone" : "politics"},
+	{"path": "/science", 		"link_text" : "Science",			"zone" : "science"}, 
+	{"path": "/technology",		"link_text" : "Technology", 		"zone" : "science"},
+	{"path": "/environment",	"link_text" : "Environment", 		"zone" : "technology"},
+	{"path": "/business",		"link_text" : "Business", 			"zone" : "business"},
+	{"path": "/money",			"link_text" : "Money", 				"zone" : "money"},
+	{"path": "/sport", 			"link_text" : "Sport", 				"zone" : "sport"}, 
+	{"path": "/football", 		"link_text" : "Football", 			"zone" : "sport"}, 
+	{"path": "/film", 			"link_text" : "Film", 				"zone" : "film"},
+	{"path": "/music", 			"link_text" : "Music", 				"zone" : "music"},
+	{"path": "/culture", 		"link_text" : "Culture", 			"zone" : "culture"}, 
+	{"path": "/society", 		"link_text" : "Society", 			"zone" : "society"},  
+	{"path": "/lifeandstyle",	"link_text" : "Life and style",		"zone" : "lifeandstyle"},
+	{"path": "/travel", 		"link_text" : "Travel", 			"zone" : "travel"}, 
+	]
 
 
 class RSSFeedChecker(webapp.RequestHandler):
 
-	def get(self, feed_path):
-		feeds = all_feeds[feed_path]
+	def getFeedItem(self, feed):
+		feed_item = Feed.all().filter('path =', feed['path']).fetch(1)
 		
-		for feed in feeds:
-			feed_item = Feed.all().filter('path =', feed['path']).fetch(1)
-			if feed_item:
-				feed_item = feed_item[0]
-				feed_item.content = []
-			else:
-				feed_item = Feed(content =[], path = feed['path'])
-				
+		if feed_item:
+			feed_item = feed_item[0]
+			feed_item.content = []
+		else:
+			feed_item = Feed(content =[], path = feed['path'])
+		
+		return feed_item
+			
+	def get(self):
+		for feed in all_feeds:
+			feed_item = self.getFeedItem(feed);
 			key = feed_item.put()
 			taskqueue.add(url='/task/rss', params={'key': key, 'url': root % feed['path']})
 			
@@ -62,7 +63,7 @@ class DeleteOldContent(webapp.RequestHandler):
 		logging.info("Marked %d content for deletion" % count)
 	
 def main():
-	application = webapp.WSGIApplication([(r'/cron/feeds/(.*)', RSSFeedChecker),
+	application = webapp.WSGIApplication([(r'/cron/feeds', RSSFeedChecker),
 										(r'/cron/remove_old', DeleteOldContent)], debug=True)
 	wsgiref.handlers.CGIHandler().run(application)
 

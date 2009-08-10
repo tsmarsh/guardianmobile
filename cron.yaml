@@ -1,13 +1,7 @@
 cron:
-- description: check high freq feeds
-  url: /cron/feeds/high
+- description: check feeds
+  url: /cron/feeds
   schedule: every 7 minutes
-- description: check mod freq feeds
-  url: /cron/feeds/moderate
-  schedule: every 19 minutes
-- description: check low freq feeds
-  url: /cron/feeds/low
-  schedule: every 29 minutes
 - description: Removes old content as per eula
   url: /cron/remove_old
   schedule: every day 00:00
