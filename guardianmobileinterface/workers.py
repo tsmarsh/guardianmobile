@@ -146,7 +146,7 @@ class RSSWorker(webapp.RequestHandler):
 		self.parse_item_media(item, content)
 		return content
 
-	def post(self):
+	def post(self, path):
 		
 		feed_item = db.get(self.request.get('key'))
 		url = self.request.get('url')
@@ -155,7 +155,7 @@ class RSSWorker(webapp.RequestHandler):
 			logging.info("Sent bad url, bailing and removing task: " + url)
 			return #bogus url bail and remove task
 			
-		logging.info("Working on: " + url)
+		logging.info("Working on: %s:\t%s" % (path, url))
 		
 		for event, elem in ET.iterparse(urllib2.urlopen(url)):
 			if elem.tag == "item":
@@ -194,10 +194,10 @@ class DeleteOldContentWorker(webapp.RequestHandler):
 		
 def main():
 	application = webapp.WSGIApplication(
-		[('/task/web', WebWorker), 
-		('/task/api', APIWorker),
-		('/task/rss', RSSWorker),
-		('/task/deleteold', DeleteOldContentWorker)], debug=True)
+		[(r'/task/web', WebWorker), 
+		(r'/task/api', APIWorker),
+		(r'/task/rss(.*)', RSSWorker),
+		(r'/task/deleteold', DeleteOldContentWorker)], debug=True)
 	wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':

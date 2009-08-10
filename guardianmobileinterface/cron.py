@@ -48,7 +48,7 @@ class RSSFeedChecker(webapp.RequestHandler):
 		for feed in all_feeds:
 			feed_item = self.getFeedItem(feed);
 			key = feed_item.put()
-			taskqueue.add(url='/task/rss', params={'key': key, 'url': root % feed['path']})
+			taskqueue.add(url='/task/rss'+feed['path'], params={'key': key, 'url': root % feed['path']})
 			
 class DeleteOldContent(webapp.RequestHandler):
 	def get(self):
