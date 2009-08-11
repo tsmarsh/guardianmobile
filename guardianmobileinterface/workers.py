@@ -145,19 +145,34 @@ class RSSWorker(webapp.RequestHandler):
 		content.web_url = db.Link(item.findtext('link'))
 		self.parse_item_media(item, content)
 		return content
-
+	
 	def post(self, path):
-		
 		feed_item = db.get(self.request.get('key'))
 		url = self.request.get('url')
 		
+		#Errors in cron.py can reach herem this can probably be removed later
 		if not url_re.match(url):
 			logging.info("Sent bad url, bailing and removing task: " + url)
 			return #bogus url bail and remove task
 			
 		logging.info("Working on: %s:\t%s" % (path, url))
+		rss_feed = None
 		
-		for event, elem in ET.iterparse(urllib2.urlopen(url)):
+		#Check to see if an update is required
+		if feed_item.last_modified:
+			req = urllib2.Request(url, headers={'if-modified-since' : feed_item.last_modified})
+			try:
+				rss_feed = urllib2.urlopen(req)
+			except urllib2.HTTPError, e:
+				logging.info("RSS still valid for: " + path)
+				return #rss not updated: win!
+		else:
+			rss_feed = urllib2.urlopen(url)
+			
+		feed_item.last_modified = rss_feed.headers['date']	
+		feed_item.content = []
+		#process the feed
+		for event, elem in ET.iterparse(rss_feed):
 			if elem.tag == "item":
 				link = elem.findtext("link")
 				if re.search(r'guardian.co.uk', link):

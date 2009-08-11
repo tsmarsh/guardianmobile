@@ -3,6 +3,7 @@ from google.appengine.ext import db
 class Feed(db.Model):
 	content = db.ListProperty(db.Key)
 	path = db.StringProperty()
+	last_modified = db.StringProperty()
 	
 class Tag(db.Model):
 	filter = db.StringProperty(multiline=True)

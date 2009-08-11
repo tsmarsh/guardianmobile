@@ -12,42 +12,37 @@ root = "http://www.guardian.co.uk%s/rss"
 all_feeds = [
 	{"path": "", 				"link_text" : "Front page", 		"zone" : "news"}, 
 	{"path": "/uk",				"link_text" : "UK news", 			"zone" : "news"}, 
-	{"path": "/world",			"link_text" : "World news", 		"zone" : "news"}, 
 	{"path": "/world/usa", 		"link_text" : "USA News", 			"zone" : "news"},
+	{"path": "/world",			"link_text" : "World news", 		"zone" : "news"}, 
 	{"path": "/politics", 		"link_text" : "Politics", 			"zone" : "politics"},
 	{"path": "/science", 		"link_text" : "Science",			"zone" : "science"}, 
 	{"path": "/technology",		"link_text" : "Technology", 		"zone" : "science"},
 	{"path": "/environment",	"link_text" : "Environment", 		"zone" : "technology"},
+	{"path": "/society", 		"link_text" : "Society", 			"zone" : "society"}, 
 	{"path": "/business",		"link_text" : "Business", 			"zone" : "business"},
 	{"path": "/money",			"link_text" : "Money", 				"zone" : "money"},
 	{"path": "/sport", 			"link_text" : "Sport", 				"zone" : "sport"}, 
 	{"path": "/football", 		"link_text" : "Football", 			"zone" : "sport"}, 
 	{"path": "/film", 			"link_text" : "Film", 				"zone" : "film"},
 	{"path": "/music", 			"link_text" : "Music", 				"zone" : "music"},
-	{"path": "/culture", 		"link_text" : "Culture", 			"zone" : "culture"}, 
-	{"path": "/society", 		"link_text" : "Society", 			"zone" : "society"},  
+	{"path": "/culture", 		"link_text" : "Culture", 			"zone" : "culture"},  
 	{"path": "/lifeandstyle",	"link_text" : "Life and style",		"zone" : "lifeandstyle"},
 	{"path": "/travel", 		"link_text" : "Travel", 			"zone" : "travel"}, 
 	]
 
 
 class RSSFeedChecker(webapp.RequestHandler):
-
-	def getFeedItem(self, feed):
-		feed_item = Feed.all().filter('path =', feed['path']).fetch(1)
 		
-		if feed_item:
-			feed_item = feed_item[0]
-			feed_item.content = []
-		else:
-			feed_item = Feed(content =[], path = feed['path'])
-		
-		return feed_item
-			
 	def get(self):
 		for feed in all_feeds:
-			feed_item = self.getFeedItem(feed);
-			key = feed_item.put()
+			feed_item = Feed.all().filter('path =', feed['path']).fetch(1)
+			key = None
+			if feed_item:
+				feed_item = feed_item[0]
+				key = feed_item.key()
+			else:
+				feed_item = Feed(content =[], path = feed['path'])
+				key = feed_item.put()
 			taskqueue.add(url='/task/rss'+feed['path'], params={'key': key, 'url': root % feed['path']})
 			
 class DeleteOldContent(webapp.RequestHandler):
