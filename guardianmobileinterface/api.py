@@ -127,6 +127,8 @@ class ListHandler(JSONOutputHandler):
 			for content in feed.content:
 				content_item = db.get(content)
 				if content_item and content_item.section_name:
+					#section is added by the api worker as the last step of preparation
+					#no section and its probably bogus
 					json_feed.append(self.summary_url + content_item.id)
 				else: 
 					if content_item:

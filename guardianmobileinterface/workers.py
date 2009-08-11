@@ -46,8 +46,7 @@ class APIWorker(webapp.RequestHandler):
 				break
 			except fetchers.HTTPError, e:
 				logging.error("Status code: %d\tDetails: %s" % (e.status_code, e.info))
-				logging.info("Content is not in api, deleting")
-				content.delete()
+				logging.info("Content is not in api, bailing")
 				return
 			except errors.APIKeyError, e:
 				logging.error("API being hit too hard")
@@ -112,12 +111,11 @@ class WebWorker(webapp.RequestHandler):
 		web_page = BeautifulSoup(urllib2.urlopen(url).read())
 		id = self.parseId(web_page)
 		if id:
+			#no id, no progress, api responsible for checking content is valid
 			content.id = id
 			self.parseContent(web_page, content)
 			task = taskqueue.Task(url="/task/api", params={'key': content.put() })
 			task.add(queue_name='api')
-		else:
-			content.delete()
 
 class RSSWorker(webapp.RequestHandler):
 
