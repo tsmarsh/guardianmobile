@@ -45,7 +45,6 @@ class APIWorker(webapp.RequestHandler):
 				api_item = client.item(content.id)
 				break
 			except fetchers.HTTPError, e:
-				logging.error("Status code: %d\tDetails: %s" % (e.status_code, e.info))
 				logging.info("Content is not in api, bailing")
 				return
 			except errors.APIKeyError, e:
