@@ -40,9 +40,9 @@ class DetailHandler(JSONOutputHandler):
 		json['credit'] = picture.credit
 		return json
 	
-	def buildPictures(self, pictures):
+	def buildPictures(self, picture_keys):
 		pictures = []
-		for key in pictures:
+		for key in picture_keys:
 			pictures.append(self.buildPicture(key))
 		return pictures
 		
@@ -55,9 +55,9 @@ class DetailHandler(JSONOutputHandler):
 		json['name'] = tag.name
 		return json
 	
-	def buildTags(self, tags):
+	def buildTags(self, tag_keys):
 		tags = []
-		for key in tags:
+		for key in tag_keys:
 			tags.append(self.buildTag(key))
 		return tags
 	
