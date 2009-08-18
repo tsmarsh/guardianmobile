@@ -48,18 +48,20 @@ class RSSFeedChecker(webapp.RequestHandler):
 class DeleteOldContent(webapp.RequestHandler):
 	def get(self):
 		logging.info("Deleting old content")
+		print("Deleting old content" + "\n")
 		old_content = Content.all().filter('publication_date >', datetime.now() - timedelta(-1))
 		
 		count = 0
 		for content in old_content:
 			count = count + 1
+			self.response.out.write(content.key() + "\n")
 			taskqueue.add(url='/task/deleteold', params={'key': content.key()})
 			
 		logging.info("Marked %d content for deletion" % count)
 	
 def main():
 	application = webapp.WSGIApplication([(r'/cron/feeds', RSSFeedChecker),
-										(r'/cron/remove_old', DeleteOldContent)], debug=True)
+										  (r'/cron/deleteold', DeleteOldContent)], debug=True)
 	wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':

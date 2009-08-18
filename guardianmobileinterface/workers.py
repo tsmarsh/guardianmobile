@@ -190,7 +190,6 @@ class RSSWorker(webapp.RequestHandler):
 		feed_item.put()
 
 class DeleteOldContentWorker(webapp.RequestHandler):
-	"""Required because """
 	def post(self):
 		content = db.get(self.request.get('key'))
 		if content:

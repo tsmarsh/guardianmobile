@@ -3,7 +3,7 @@ cron:
   url: /cron/feeds
   schedule: every 7 minutes
 - description: Removes old content as per eula
-  url: /cron/remove_old
+  url: /cron/deleteold
   schedule: every day 00:00
 
  
