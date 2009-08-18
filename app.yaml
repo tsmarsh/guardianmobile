@@ -6,9 +6,12 @@ api_version: 1
 handlers:
 - url: /cron/.*
   script: guardianmobileinterface/cron.py
+  login: admin
 - url: /task/.*
   script: guardianmobileinterface/workers.py
+  login: admin
 - url: /api/.*
   script: guardianmobileinterface/api.py
 - url: /admin/.*
   script: guardianmobileinterface/admin.py
+  login: admin
